@@ -1,0 +1,34 @@
+body {
+    padding-top: 56px; /* Magasság a fix navbar miatt - megemelt érték a fixált navbar-hoz */
+    background-color: #f8f9fa;
+}
+
+/* Fixált navigációs sáv */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Biztosítja, hogy a navbar a tartalom előtt jelenjen meg */
+}
+
+.arena-image {
+    max-height: 512px; /* Maximális képmagasság, hogy ne legyenek túl nagyok */
+    width: auto;       /* Szélesség automatikus */
+    max-width: 100%;   /* De ne lógjon ki a konténerből */
+    display: block;    /* Középre igazításhoz */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #e9ecef; /* Háttérszín, amíg tölt a kép */
+    min-height: 200px; /* Minimális magasság, hogy ne ugorjon a layout */
+    border: 1px solid #dee2e6;
+}
+
+/* Opcionális: Betöltés animáció a képek helyén */
+/* .arena-image[src=""] { */
+    /* background: #e9ecef url('loading.gif') center center no-repeat; */
+/* } */
+
+#loading-indicator {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

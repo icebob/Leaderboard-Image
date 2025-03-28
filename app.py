@@ -1,0 +1,248 @@
+import os
+import random
+import sqlite3
+from flask import Flask, render_template, jsonify, request, send_from_directory, abort
+from database import get_db, init_db, get_prompt_ids, MODELS, update_elo
+from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO
+
+app = Flask(__name__)
+app.config['DATA_DIR'] = DATA_DIR # Flask konfigurációban is tároljuk
+
+# Adatbázis inicializálása indításkor (ha szükséges)
+with app.app_context():
+    init_db()
+
+AVAILABLE_PROMPTS = [] # Gyorsítótárazzuk a prompt ID-kat
+
+def update_available_prompts():
+    """Frissíti az elérhető prompt ID-k listáját."""
+    global AVAILABLE_PROMPTS
+    AVAILABLE_PROMPTS = get_prompt_ids()
+    if not AVAILABLE_PROMPTS:
+        print("Warning: No valid prompts found in data directory!")
+
+@app.before_request
+def before_first_request_func():
+    # Első kérés előtt (vagy fejlesztéskor minden kérés előtt, ha `debug=True`)
+    # frissítjük a prompt listát, hogy az új mappák megjelenjenek újraindítás nélkül.
+    # Éles környezetben ezt ritkábban is lehet futtatni.
+    if app.debug: # Csak debug módban frissítsen minden kérésnél
+       update_available_prompts()
+    elif not AVAILABLE_PROMPTS: # Vagy ha még üres a lista
+       update_available_prompts()
+
+
+@app.route('/')
+def index():
+    """Főoldal megjelenítése."""
+    return render_template('index.html', models=list(MODELS.keys()))
+
+# Módosítás: Engedélyezzük a .jpeg kiterjesztést is
+@app.route('/images/<prompt_id>/<filename>')
+def serve_image(prompt_id, filename):
+    """Képfájlok kiszolgálása a data mappából."""
+    # Biztonsági ellenőrzés: csak az engedélyezett kiterjesztéseket engedélyezzük
+    if not any(filename.endswith(ext) for ext in ALLOWED_EXTENSIONS):
+        print(f"Access denied for filename: {filename}")
+        abort(404)
+
+    # Ellenőrizzük, hogy a prompt_id létezik-e
+    if prompt_id not in AVAILABLE_PROMPTS:
+        print(f"Access denied for prompt_id: {prompt_id}")
+        abort(404)
+
+    directory = os.path.join(app.config['DATA_DIR'], prompt_id)
+    # `send_from_directory` biztonságosabb, mint kézzel összerakni az útvonalat
+    try:
+        return send_from_directory(directory, filename)
+    except FileNotFoundError:
+        print(f"Image not found: {directory}/{filename}")
+        abort(404)
+
+
+# --- API Endpoints ---
+
+# Módosítás: Arena Battle mód - ne jelenítse meg a modellek nevét szavazás előtt
+@app.route('/api/battle_data')
+def get_battle_data():
+    """Adatokat ad vissza az Arena Battle módhoz."""
+    if not AVAILABLE_PROMPTS:
+        return jsonify({"error": "No prompts available"}), 500
+
+    prompt_id = random.choice(AVAILABLE_PROMPTS)
+    prompt_path = os.path.join(app.config['DATA_DIR'], prompt_id, 'prompt.txt')
+
+    try:
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            prompt_text = f.read().strip()
+    except FileNotFoundError:
+        return jsonify({"error": f"Prompt file not found for ID: {prompt_id}"}), 500
+    except Exception as e:
+         return jsonify({"error": f"Error reading prompt file: {e}"}), 500
+
+    # Válassz két KÜLÖNBÖZŐ modellt véletlenszerűen
+    model_keys = list(MODELS.keys())
+    if len(model_keys) < 2:
+        return jsonify({"error": "Not enough models defined for battle"}), 500
+    model1_key, model2_key = random.sample(model_keys, 2)
+
+    data = {
+        "prompt_id": prompt_id,
+        "prompt_text": prompt_text,
+        "model1": {
+            "key": model1_key,
+            "image_url": f"/images/{prompt_id}/{MODELS[model1_key]}"
+        },
+        "model2": {
+            "key": model2_key,
+            "image_url": f"/images/{prompt_id}/{MODELS[model2_key]}"
+        },
+        "reveal_models": False  # Új mező: a modellek neveit csak szavazás után fedjük fel
+    }
+    return jsonify(data)
+
+@app.route('/api/side_by_side_data')
+def get_side_by_side_data():
+    """Adatokat ad vissza az Arena Side-by-Side módhoz."""
+    model1_key = request.args.get('model1')
+    model2_key = request.args.get('model2')
+
+    if not model1_key or not model2_key:
+        return jsonify({"error": "Both model1 and model2 parameters are required"}), 400
+
+    if model1_key not in MODELS or model2_key not in MODELS:
+        return jsonify({"error": "Invalid model key provided"}), 400
+
+    if not AVAILABLE_PROMPTS:
+        return jsonify({"error": "No prompts available"}), 500
+
+    # Itt is választhatunk véletlenszerű promptot
+    prompt_id = random.choice(AVAILABLE_PROMPTS)
+    prompt_path = os.path.join(app.config['DATA_DIR'], prompt_id, 'prompt.txt')
+
+    try:
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            prompt_text = f.read().strip()
+    except FileNotFoundError:
+        return jsonify({"error": f"Prompt file not found for ID: {prompt_id}"}), 500
+    except Exception as e:
+         return jsonify({"error": f"Error reading prompt file: {e}"}), 500
+
+    data = {
+        "prompt_id": prompt_id,
+        "prompt_text": prompt_text,
+        "model1": {
+            "key": model1_key,
+            "image_url": f"/images/{prompt_id}/{MODELS[model1_key]}"
+        },
+        "model2": {
+            "key": model2_key,
+            "image_url": f"/images/{prompt_id}/{MODELS[model2_key]}"
+        }
+    }
+    return jsonify(data)
+
+
+@app.route('/api/vote', methods=['POST'])
+def record_vote():
+    """Szavazat rögzítése az adatbázisban."""
+    data = request.json
+    prompt_id = data.get('prompt_id')
+    winner = data.get('winner')
+    loser = data.get('loser')
+
+    if not all([prompt_id, winner, loser]):
+        return jsonify({"error": "Missing data for vote"}), 400
+
+    if winner not in MODELS or loser not in MODELS:
+         return jsonify({"error": "Invalid model name in vote"}), 400
+
+    try:
+        db = get_db()
+        with db:
+            # Szavazat rögzítése
+            db.execute(
+                'INSERT INTO votes (prompt_id, winner, loser) VALUES (?, ?, ?)',
+                (prompt_id, winner, loser)
+            )
+            
+            # ELO értékek frissítése
+            winner_new_elo, loser_new_elo = update_elo(db, winner, loser)
+            db.commit()
+            
+        return jsonify({
+            "success": True, 
+            "message": f"Vote recorded for {winner} against {loser}",
+            "winner_new_elo": round(winner_new_elo, 1),
+            "loser_new_elo": round(loser_new_elo, 1)
+        })
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "Database error while recording vote"}), 500
+    except Exception as e:
+        print(f"Error recording vote: {e}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
+@app.route('/api/leaderboard')
+def get_leaderboard():
+    """Leaderboard adatok lekérdezése és kiszámítása."""
+    try:
+        db = get_db()
+        # Összes győzelem számolása modellenként
+        wins_cursor = db.execute('''
+            SELECT winner, COUNT(*) as win_count
+            FROM votes
+            GROUP BY winner
+        ''')
+        wins = {row['winner']: row['win_count'] for row in wins_cursor.fetchall()}
+
+        # Összes meccs számolása modellenként (győztesként VAGY vesztesként)
+        total_matches_cursor = db.execute('''
+            SELECT model, COUNT(*) as match_count
+            FROM (
+                SELECT winner as model FROM votes
+                UNION ALL
+                SELECT loser as model FROM votes
+            )
+            GROUP BY model
+        ''')
+        total_matches = {row['model']: row['match_count'] for row in total_matches_cursor.fetchall()}
+        
+        # ELO értékek lekérdezése a model_elo táblából
+        elo_cursor = db.execute('SELECT model, elo FROM model_elo')
+        elo_ratings = {row['model']: row['elo'] for row in elo_cursor.fetchall()}
+
+        leaderboard = []
+        all_model_keys = list(MODELS.keys())
+        for model in all_model_keys:
+            model_wins = wins.get(model, 0)
+            model_matches = total_matches.get(model, 0)
+            win_rate = (model_wins / model_matches * 100) if model_matches > 0 else 0
+            elo = elo_ratings.get(model, DEFAULT_ELO)  # Ha nincs ELO érték, használjuk az alapértelmezettet
+
+            leaderboard.append({
+                "model": model,
+                "wins": model_wins,
+                "matches": model_matches,
+                "win_rate": round(win_rate, 2),
+                "elo": round(elo, 1)  # Egy tizedesjegyre kerekítjük az ELO értéket
+            })
+
+        # Rendezés ELO pontszám szerint csökkenő sorrendben
+        leaderboard.sort(key=lambda x: x['elo'], reverse=True)
+
+        return jsonify(leaderboard)
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "Database error while fetching leaderboard"}), 500
+    except Exception as e:
+        print(f"Error fetching leaderboard: {e}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
+
+if __name__ == '__main__':
+    # Indítás előtt frissítjük a prompt listát
+    update_available_prompts()
+    # Debug mód fejlesztéshez, élesben False és használj pl. Gunicornt/Waitress-t
+    app.run(debug=True, host='0.0.0.0')

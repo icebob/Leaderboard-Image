@@ -1,0 +1,17 @@
+A square image containing a 4 row by 4 column grid containing 16 objects on a white background. Go from left to right, top to bottom. Here's the list:
+1. a blue star
+2. red triangle
+3. green square
+4. pink circle
+5. orange hourglass
+6. purple infinity sign
+7. black and white polka dot bowtie
+8. tiedye "42"
+9. an orange cat wearing a black baseball cap
+10. a map with a treasure chest
+11. a pair of googly eyes
+12. a thumbs up emoji
+13. a pair of scissors
+14. a blue and white giraffe
+15. the word "OpenAI" written in cursive
+16. a rainbow-colored lightning bolt

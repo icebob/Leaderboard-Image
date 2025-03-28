@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Képgenerátor Aréna - Dokumentáció</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar-docs">
+    <nav id="navbar-docs" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Képgenerátor Aréna</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview">Áttekintés</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Funkciók</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#modes">Módok</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#technicals">Technikai információk</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#installation">Telepítés</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#config">Konfigurálás</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5 pt-5">
+        <div class="p-4 p-md-5 mb-4 rounded bg-dark text-white hero-container">
+            <div class="col-md-8 px-0">
+                <h1 class="display-4">Képgenerátor Aréna Dokumentáció</h1>
+                <p class="lead my-3">Átfogó dokumentáció az AI képgenerátorok összehasonlítását és értékelését szolgáló rendszerhez.</p>
+                <p class="lead mb-0">
+                    <a href="#overview" class="btn btn-light fw-bold">Tovább a dokumentációhoz</a>
+                </p>
+            </div>
+        </div>
+
+        <section id="overview" class="mb-5">
+            <h2 class="border-bottom pb-2">Áttekintés</h2>
+            <div class="row">
+                <div class="col-md-8">
+                    <p>
+                        A Képgenerátor Aréna egy web-alapú alkalmazás, amely lehetővé teszi különböző AI képgenerátorok által létrehozott képek összehasonlítását és értékelését. A rendszer három fő módot kínál:
+                    </p>
+                    <ul>
+                        <li><strong>Arena Battle:</strong> Két kép közvetlen összehasonlítása, ahol a felhasználók a jobbnak ítélt képre szavazhatnak.</li>
+                        <li><strong>Side-by-Side:</strong> Két kiválasztott modell képeinek összehasonlítása egymás mellett.</li>
+                        <li><strong>Leaderboard:</strong> A modellek ranglistája az ELO pontszámok és egyéb statisztikák alapján.</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Jelenleg támogatott modellek</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Grok</li>
+                                <li class="list-group-item">Gemini Flash</li>
+                                <li class="list-group-item">Gemini 2.5 Pro</li>
+                                <li class="list-group-item">GPT-4o</li>
+                                <li class="list-group-item">Midjourney</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="mb-5">
+            <h2 class="border-bottom pb-2">Funkciók</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-trophy"></i> ELO Rating</h5>
+                            <p class="card-text">Fejlett ELO pontrendszer, amely figyelembe veszi az ellenfelek erősségét a modellek rangsorolásában.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-image"></i> Több formátum támogatása</h5>
+                            <p class="card-text">A rendszer támogatja a JPG, JPEG és PNG formátumú képeket.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-gear"></i> Konfigurálhatóság</h5>
+                            <p class="card-text">A modellek, fájlformátumok és alapbeállítások külön konfigurációs fájlban vannak tárolva.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-eye-slash"></i> Vak szavazás</h5>
+                            <p class="card-text">Arena Battle módban a modellek nevei csak a szavazás után jelennek meg.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-columns"></i> Összehasonlítási módok</h5>
+                            <p class="card-text">Többféle mód a képek összehasonlítására és értékelésére.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-bar-chart"></i> Részletes statisztikák</h5>
+                            <p class="card-text">ELO pontszámok, győzelmek, mérkőzések száma és győzelmi arányok nyomon követése.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="modes" class="mb-5">
+            <h2 class="border-bottom pb-2">Üzemmódok</h2>
+            
+            <div class="mode-section mt-4">
+                <h3><i class="bi bi-controller"></i> Arena Battle</h3>
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p>
+                            Az Arena Battle a rendszer fő módja, ahol két véletlenszerűen kiválasztott modell által generált kép jelenik meg egymás mellett. A felhasználók kiválaszthatják, melyik kép tetszik jobban, vagy döntetlen/kihagyás opciót választhatnak.
+                        </p>
+                        <p>
+                            <strong>Különleges funkció:</strong> A modellek nevei csak a szavazás után jelennek meg, így biztosítva az elfogulatlan értékelést.
+                        </p>
+                        <ul>
+                            <li>A szavazás után a rendszer frissíti az ELO értékeket</li>
+                            <li>A modellek nevei 1,5 másodpercre láthatóvá válnak a szavazás után</li>
+                            <li>Automatikusan betöltődik a következő összecsapás</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="images/arena-battle.png" alt="Arena Battle mód képernyőképe" class="img-fluid rounded shadow-sm">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mode-section mt-4">
+                <h3><i class="bi bi-layout-split"></i> Side-by-Side</h3>
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p>
+                            A Side-by-Side módban a felhasználók maguk választhatják ki, melyik két modellt szeretnék összehasonlítani. Ez a mód elsősorban vizuális összehasonlításra szolgál, nincs szavazás.
+                        </p>
+                        <p>
+                            Ez a mód hasznos lehet:
+                        </p>
+                        <ul>
+                            <li>Specifikus modellek közvetlen összehasonlítására</li>
+                            <li>A modellek erősségeinek és gyengeségeinek alaposabb vizsgálatára</li>
+                            <li>Oktatási célokra, hogy bemutassa a különböző modellek képességeit</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="images/side-by-side.png" alt="Side-by-Side mód képernyőképe" class="img-fluid rounded shadow-sm">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mode-section mt-4">
+                <h3><i class="bi bi-trophy"></i> Leaderboard</h3>
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p>
+                            A Leaderboard a modellek ranglistáját mutatja ELO pontszám szerint csökkenő sorrendben. A táblázat tartalmazza az ELO értékeket, a győzelmek számát, az összes mérkőzés számát és a győzelmi arányt.
+                        </p>
+                        <p>
+                            <strong>ELO rendszer:</strong> A rangsorolás a sakk-világból ismert ELO pontrendszeren alapul, amely figyelembe veszi az ellenfelek erősségét.
+                        </p>
+                        <ul>
+                            <li>Az új modellek alapértelmezett ELO értékkel (1500) kezdenek</li>
+                            <li>A szavazások hatására a pontok dinamikusan változnak</li>
+                            <li>Az erősebb ellenfél legyőzéséért több pont jár</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="images/leaderboard.png" alt="Leaderboard mód képernyőképe" class="img-fluid rounded shadow-sm">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="technicals" class="mb-5">
+            <h2 class="border-bottom pb-2">Technikai információk</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Frontend</h4>
+                    <ul>
+                        <li>HTML5, CSS3, JavaScript</li>
+                        <li>Bootstrap 5 keretrendszer</li>
+                        <li>Fetch API aszinkron kérésekhez</li>
+                        <li>Reszponzív design mobilos és asztali böngészőkhöz</li>
+                    </ul>
+                    
+                    <h4>Backend</h4>
+                    <ul>
+                        <li>Python, Flask mikrokeretrendszer</li>
+                        <li>SQLite adatbázis</li>
+                        <li>RESTful API végpontok</li>
+                        <li>JSON adatcsere formátum</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Adatbázis struktúra</h4>
+                    <p>A rendszer két fő táblát használ:</p>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">votes tábla</div>
+                        <div class="card-body">
+                            <code>
+                                id INTEGER PRIMARY KEY<br>
+                                prompt_id TEXT<br>
+                                winner TEXT<br>
+                                loser TEXT<br>
+                                voted_at TIMESTAMP
+                            </code>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-light">model_elo tábla</div>
+                        <div class="card-body">
+                            <code>
+                                model TEXT PRIMARY KEY<br>
+                                elo REAL<br>
+                                last_updated TIMESTAMP
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h4>Fájlstruktúra</h4>
+                <pre class="bg-light p-3 rounded">
+app.py            # Flask alkalmazás, API végpontok
+config.py         # Konfigurációs beállítások
+database.py       # Adatbázis műveletek, ELO számítások
+requirements.txt  # Függőségek listája
+data/             # Prompt mappák és képek
+├── 001/
+│   ├── prompt.txt
+│   ├── gemini-25pro.jpg
+│   ├── gemini-flash.jpeg
+│   ├── gpt4o.png
+│   ├── grok.jpg
+│   └── midjourney.png
+├── 002/
+│   └── ...
+static/           # Statikus fájlok
+└── templates/    # HTML sablonok</pre>
+            </div>
+        </section>
+
+        <section id="installation" class="mb-5">
+            <h2 class="border-bottom pb-2">Telepítés és indítás</h2>
+            
+            <h4>Követelmények</h4>
+            <ul>
+                <li>Python 3.6+</li>
+                <li>pip (Python csomagkezelő)</li>
+                <li>Git (opcionális)</li>
+            </ul>
+            
+            <h4>Telepítési lépések</h4>
+            <div class="code-block">
+                <pre class="bg-light p-3 rounded"><code># 1. Klónozd vagy töltsd le a repository-t
+git clone https://github.com/yourusername/image-leaderboard.git
+cd image-leaderboard
+
+# 2. Függőségek telepítése
+pip install -r requirements.txt
+
+# 3. Adatbázis inicializálása
+python database.py
+
+# 4. Alkalmazás indítása
+flask run --host=0.0.0.0
+
+# Az alkalmazás alapértelmezetten a következő címen érhető el:
+# http://localhost:5000</code></pre>
+            </div>
+            
+            <h4 class="mt-4">Parancsok magyarázata</h4>
+            <div class="card mb-3">
+                <div class="card-header bg-light"><code>python database.py</code></div>
+                <div class="card-body">
+                    <p>Ez a parancs inicializálja az adatbázist. Létrehozza a szükséges táblákat (votes és model_elo) az SQLite adatbázisban, ha még nem léteznek, és beállítja az alapértelmezett ELO értékeket a modellekhez. A parancs futtatása után ellenőrzi a data mappában található prompt ID-kat is.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-light"><code>flask run --host=0.0.0.0</code></div>
+                <div class="card-body">
+                    <p>Ez a parancs elindítja a Flask webszervert. A <code>--host=0.0.0.0</code> paraméter lehetővé teszi, hogy az alkalmazás ne csak a localhost-ról, hanem a hálózat más eszközeiről is elérhető legyen. Ez különösen hasznos, ha más eszközökről (pl. mobiltelefon, tablet vagy más számítógép) is szeretnéd elérni az alkalmazást ugyanazon a hálózaton belül.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="config" class="mb-5">
+            <h2 class="border-bottom pb-2">Konfigurálás</h2>
+            
+            <p>
+                A rendszer konfigurációs beállításai a <code>config.py</code> fájlban találhatók. Itt módosíthatók a következő beállítások:
+            </p>
+            
+            <div class="code-block">
+                <pre class="bg-light p-3 rounded"><code># Adatbázis fájl neve
+DATABASE = 'votes.db'
+
+# Az adatmappák elérési útja
+DATA_DIR = 'data'
+
+# Modell nevek és a hozzájuk tartozó fájlkiterjesztések/nevek
+MODELS = {
+    'grok': 'grok.jpg',
+    'gemini-flash': 'gemini-flash.jpeg',
+    'gemini-25pro': 'gemini-25pro.jpg',
+    'gpt4o': 'gpt4o.png',
+    'midjourney': 'midjourney.png'
+}
+
+# Engedélyezett képkiterjesztések listája
+ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+
+# ELO Rating beállítások
+DEFAULT_ELO = 1500  # Alapértelmezett ELO érték új modellekhez
+K_FACTOR = 32       # K-faktor - a magasabb érték nagyobb változást eredményez</code></pre>
+            </div>
+            
+            <h4 class="mt-4">Új modell hozzáadása</h4>
+            <p>
+                Új modell hozzáadásához a következő lépéseket kell követni:
+            </p>
+            <ol>
+                <li>Helyezd el az új modell által generált képeket minden prompt mappában a megfelelő fájlnévkonvencióval</li>
+                <li>Add hozzá a modellt a <code>config.py</code> fájl <code>MODELS</code> szótárához</li>
+                <li>Indítsd újra az alkalmazást, hogy az új modell megjelenjen a felületeken</li>
+            </ol>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Képgenerátor Aréna</h5>
+                    <p class="small">AI képgenerátorok összehasonlítására és értékelésére szolgáló rendszer.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="small">Készült Flask & Bootstrap használatával.</p>
+                    <p class="small">© 2025 Minden jog fenntartva.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>

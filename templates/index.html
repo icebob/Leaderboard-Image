@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Képgenerátor Aréna</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Kép Aréna</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-mode="battle">Arena Battle</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-mode="side-by-side">Side-by-Side</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-mode="leaderboard">Leaderboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="loading-indicator" class="text-center" style="display: none;">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Arena Battle Mode -->
+        <div id="battle-mode" class="arena-mode">
+            <h2 class="text-center mb-3">Arena Battle: Melyik kép a jobb?</h2>
+            <p class="text-center mb-4 fst-italic" id="battle-prompt">Prompt betöltése...</p>
+            <div class="row justify-content-center">
+                <div class="col-md-5 text-center mb-3">
+                    <h4 id="battle-model1-name">Modell A</h4>
+                    <img id="battle-image1" src="" alt="Modell A képe" class="img-fluid rounded arena-image mb-2">
+                    <button id="vote-btn1" class="btn btn-success w-100">Ez tetszik jobban</button>
+                </div>
+                <div class="col-md-5 text-center mb-3">
+                    <h4 id="battle-model2-name">Modell B</h4>
+                    <img id="battle-image2" src="" alt="Modell B képe" class="img-fluid rounded arena-image mb-2">
+                    <button id="vote-btn2" class="btn btn-success w-100">Ez tetszik jobban</button>
+                 </div>
+            </div>
+             <div class="row justify-content-center mt-2">
+                 <div class="col-md-5 text-center">
+                     <button id="tie-btn" class="btn btn-secondary w-100">Döntetlen / Egyik sem tetszik</button>
+                 </div>
+                 <div class="col-md-5 text-center">
+                    <button id="skip-btn" class="btn btn-warning w-100">Következő prompt (kihagyás)</button>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Side-by-Side Mode -->
+        <div id="side-by-side-mode" class="arena-mode" style="display: none;">
+            <h2 class="text-center mb-3">Side-by-Side Összehasonlítás</h2>
+            <div class="row mb-3 justify-content-center">
+                <div class="col-md-4">
+                    <label for="sbs-model1-select" class="form-label">Válassz modellt 1:</label>
+                    <select id="sbs-model1-select" class="form-select">
+                        {% for model in models %}
+                        <option value="{{ model }}">{{ model }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="sbs-model2-select" class="form-label">Válassz modellt 2:</label>
+                    <select id="sbs-model2-select" class="form-select">
+                         {% for model in models %}
+                         {% if loop.index == 2 %} {# Alapértelmezetten a másodikat válasszuk #}
+                         <option value="{{ model }}" selected>{{ model }}</option>
+                         {% else %}
+                         <option value="{{ model }}">{{ model }}</option>
+                         {% endif %}
+                         {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 align-self-end">
+                    <button id="sbs-load-btn" class="btn btn-primary w-100">Betöltés / Új Prompt</button>
+                </div>
+            </div>
+            <p class="text-center mb-4 fst-italic" id="sbs-prompt">Válassz modelleket és kattints a Betöltés gombra...</p>
+            <div class="row justify-content-center">
+                <div class="col-md-5 text-center mb-3">
+                    <h4 id="sbs-model1-name">Modell 1</h4>
+                    <img id="sbs-image1" src="" alt="Modell 1 képe" class="img-fluid rounded arena-image">
+                </div>
+                <div class="col-md-5 text-center mb-3">
+                    <h4 id="sbs-model2-name">Modell 2</h4>
+                    <img id="sbs-image2" src="" alt="Modell 2 képe" class="img-fluid rounded arena-image">
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Mode -->
+        <div id="leaderboard-mode" class="arena-mode" style="display: none;">
+            <h2 class="text-center mb-4">Leaderboard</h2>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Modell</th>
+                        <th>ELO Rating</th>
+                        <th>Győzelmek</th>
+                        <th>Meccsek száma</th>
+                        <th>Győzelmi arány</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-table-body">
+                    <!-- Leaderboard adatok ide kerülnek -->
+                </tbody>
+            </table>
+             <div class="text-center mt-3">
+                <button id="refresh-leaderboard-btn" class="btn btn-info">Leaderboard frissítése</button>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="text-center mt-5 mb-3 text-muted">
+        <small>Készült Flask & Bootstrap használatával.</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
