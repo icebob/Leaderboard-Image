@@ -10,11 +10,12 @@ DATA_DIR = 'data'
 # Fontos: A kulcsoknak meg kell egyezniük a fájlnevekben használtakkal (kiterjesztés nélkül)
 # és azokkal, amiket a frontend/backend logikában használsz.
 MODELS = {
-    'grok': 'grok.jpg',
-    'gemini-flash': 'gemini-flash.jpeg',
-    'gemini-25pro': 'gemini-25pro.jpg',
-    'gpt4o': 'gpt4o.png',
-    'midjourney': 'midjourney.png'  # Figyelj arra, hogy ez PNG kiterjesztést használ
+    'Grok': 'grok.jpg',
+    'Google Gemini Flash': 'gemini-flash.jpeg',
+    'Google Imagen 3': 'imagen3.jpg',
+    'ChatGPT GPT 4o': 'gpt4o.png',
+    'Midjourney': 'midjourney.png',  # Figyelj arra, hogy ez PNG kiterjesztést használ
+    'Reve': 'reve.png'
 }
 
 # Engedélyezett képkiterjesztések listája
