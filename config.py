@@ -6,16 +6,15 @@ DATABASE = 'votes.db'
 # Az adatmappák elérési útja
 DATA_DIR = 'data'
 
-# Modell nevek és a hozzájuk tartozó fájlkiterjesztések/nevek
-# Fontos: A kulcsoknak meg kell egyezniük a fájlnevekben használtakkal (kiterjesztés nélkül)
-# és azokkal, amiket a frontend/backend logikában használsz.
+# Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
+# Fontos: Ezek csak a fájlok alapnevei, a kiterjesztés dinamikusan lesz meghatározva
 MODELS = {
-    'Grok': 'grok.jpg',
-    'Google Gemini Flash': 'gemini-flash.jpeg',
-    'Google Imagen 3': 'imagen3.jpg',
-    'ChatGPT GPT 4o': 'gpt4o.png',
-    'Midjourney': 'midjourney.png',  # Figyelj arra, hogy ez PNG kiterjesztést használ
-    'Reve': 'reve.png'
+    'Grok': 'grok',
+    'Google Gemini Flash': 'gemini-flash',
+    'Google Imagen 3': 'imagen3',
+    'ChatGPT GPT 4o': 'gpt4o',
+    'Midjourney': 'midjourney',
+    'Reve': 'reve'
 }
 
 # Engedélyezett képkiterjesztések listája

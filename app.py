@@ -2,9 +2,10 @@ import os
 import random
 import sqlite3
 import sys
+import glob
 from flask import Flask, render_template, jsonify, request, send_from_directory, abort
-from database import get_db, init_db, get_prompt_ids, MODELS, update_elo
-from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO
+from database import get_db, init_db, get_prompt_ids, update_elo
+from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO, MODELS
 
 app = Flask(__name__)
 app.config['DATA_DIR'] = DATA_DIR # Flask konfigurációban is tároljuk
@@ -21,6 +22,37 @@ def update_available_prompts():
     AVAILABLE_PROMPTS = get_prompt_ids()
     if not AVAILABLE_PROMPTS:
         print("Warning: No valid prompts found in data directory!")
+
+# Új segédfüggvény a fájlok megtalálásához, ami nem veszi figyelembe a kiterjesztést
+def find_model_file(prompt_id, model_base_name):
+    """
+    Megkeresi a megfelelő modell fájlt a megadott mappában, a kiterjesztéstől függetlenül.
+    
+    :param prompt_id: A prompt mappájának azonosítója
+    :param model_base_name: A modell fájl alapneve kiterjesztés nélkül
+    :return: A teljes fájlnév kiterjesztéssel, vagy None ha nem található
+    """
+    directory = os.path.join(app.config['DATA_DIR'], prompt_id)
+    
+    # Megnézzük az összes lehetséges kiterjesztéssel, hogy létezik-e a fájl
+    for ext in ALLOWED_EXTENSIONS:
+        potential_file = f"{model_base_name}{ext}"
+        if os.path.exists(os.path.join(directory, potential_file)):
+            return potential_file
+    
+    # Ha nem találtuk meg a pontos egyezést, próbáljuk meg fájlmintával
+    pattern = os.path.join(directory, f"{model_base_name}.*")
+    matching_files = glob.glob(pattern)
+    
+    # Szűrjük az eredményt csak az engedélyezett kiterjesztésekre
+    for file in matching_files:
+        # Ellenőrizzük, hogy a fájl kiterjesztése engedélyezett-e
+        file_ext = os.path.splitext(file)[1].lower()
+        if file_ext in ALLOWED_EXTENSIONS:
+            return os.path.basename(file)
+    
+    return None
+
 
 @app.before_request
 def before_first_request_func():
@@ -58,6 +90,7 @@ def index():
     """Főoldal megjelenítése."""
     return render_template('index.html', models=list(MODELS.keys()))
 
+
 # Módosítás: Engedélyezzük a .jpeg kiterjesztést is
 @app.route('/images/<prompt_id>/<filename>')
 def serve_image(prompt_id, filename):
@@ -87,7 +120,7 @@ def serve_image(prompt_id, filename):
 # Módosítás: Arena Battle mód - ne jelenítse meg a modellek nevét szavazás előtt
 @app.route('/api/battle_data')
 def get_battle_data():
-    """Adatokat ad vissza az Arena Battle módhoz."""
+    """Adatokat ad vissza az Arena Battle módhoz."""    
     if not AVAILABLE_PROMPTS:
         return jsonify({"error": "No prompts available"}), 500
 
@@ -108,16 +141,26 @@ def get_battle_data():
         return jsonify({"error": "Not enough models defined for battle"}), 500
     model1_key, model2_key = random.sample(model_keys, 2)
 
+    # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
+    model1_file = find_model_file(prompt_id, MODELS[model1_key])
+    model2_file = find_model_file(prompt_id, MODELS[model2_key])
+    
+    # Ha valamelyik fájl nem található, hibaüzenetet adunk vissza
+    if not model1_file:
+        return jsonify({"error": f"Image for model {model1_key} not found in prompt {prompt_id}"}), 500
+    if not model2_file:
+        return jsonify({"error": f"Image for model {model2_key} not found in prompt {prompt_id}"}), 500
+
     data = {
         "prompt_id": prompt_id,
         "prompt_text": prompt_text,
         "model1": {
             "key": model1_key,
-            "image_url": f"/images/{prompt_id}/{MODELS[model1_key]}"
+            "image_url": f"/images/{prompt_id}/{model1_file}"
         },
         "model2": {
             "key": model2_key,
-            "image_url": f"/images/{prompt_id}/{MODELS[model2_key]}"
+            "image_url": f"/images/{prompt_id}/{model2_file}"
         },
         "reveal_models": False  # Új mező: a modellek neveit csak szavazás után fedjük fel
     }
@@ -150,16 +193,26 @@ def get_side_by_side_data():
     except Exception as e:
          return jsonify({"error": f"Error reading prompt file: {e}"}), 500
 
+    # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
+    model1_file = find_model_file(prompt_id, MODELS[model1_key])
+    model2_file = find_model_file(prompt_id, MODELS[model2_key])
+    
+    # Ha valamelyik fájl nem található, hibaüzenetet adunk vissza
+    if not model1_file:
+        return jsonify({"error": f"Image for model {model1_key} not found in prompt {prompt_id}"}), 500
+    if not model2_file:
+        return jsonify({"error": f"Image for model {model2_key} not found in prompt {prompt_id}"}), 500
+
     data = {
         "prompt_id": prompt_id,
         "prompt_text": prompt_text,
         "model1": {
             "key": model1_key,
-            "image_url": f"/images/{prompt_id}/{MODELS[model1_key]}"
+            "image_url": f"/images/{prompt_id}/{model1_file}"
         },
         "model2": {
             "key": model2_key,
-            "image_url": f"/images/{prompt_id}/{MODELS[model2_key]}"
+            "image_url": f"/images/{prompt_id}/{model2_file}"
         }
     }
     return jsonify(data)
@@ -207,27 +260,20 @@ def record_vote():
 
 @app.route('/api/leaderboard')
 def get_leaderboard():
-    """Leaderboard adatok lekérdezése és kiszámítása."""
+    """Leaderboard adatok lekérdezése és kiszámítása."""    
     try:
         db = get_db()
         # Összes győzelem számolása modellenként
-        wins_cursor = db.execute('''
-            SELECT winner, COUNT(*) as win_count
-            FROM votes
-            GROUP BY winner
-        ''')
+        wins_cursor = db.execute('''SELECT winner, COUNT(*) as win_count FROM votes GROUP BY winner''')
         wins = {row['winner']: row['win_count'] for row in wins_cursor.fetchall()}
 
         # Összes meccs számolása modellenként (győztesként VAGY vesztesként)
-        total_matches_cursor = db.execute('''
-            SELECT model, COUNT(*) as match_count
-            FROM (
+        total_matches_cursor = db.execute('''SELECT model, COUNT(*) as match_count FROM (
                 SELECT winner as model FROM votes
                 UNION ALL
                 SELECT loser as model FROM votes
             )
-            GROUP BY model
-        ''')
+            GROUP BY model''')
         total_matches = {row['model']: row['match_count'] for row in total_matches_cursor.fetchall()}
         
         # ELO értékek lekérdezése a model_elo táblából
