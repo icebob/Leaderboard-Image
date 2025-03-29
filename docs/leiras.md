@@ -21,3 +21,10 @@ Modernizálás és További Ötletek:
 KÉSZ:    Konfigurálhatóság: A modellneveket, fájlkiterjesztéseket, data könyvtárat tedd konfigurációs fájlba (pl. config.py vagy .env).
 
     Frontend Framework: Komplexebb interakciókhoz vagy nagyobb alkalmazáshoz megfontolható egy frontend framework (React, Vue, Svelte) használata, de ez jelentősen növeli a komplexitást az alap HTML/JS/Flask kombóhoz képest.
+
+Parancssori funkciók:
+
+    Szavazatok resetelése: A programot futtathatod `python app.py reset-votes` paranccsal, ami törli az összes eddigi szavazatot és visszaállítja az ELO pontszámokat az alapértelmezett értékre. Ezt akkor érdemes használni, ha:
+      - Teljesen új versenyt akarsz indítani
+      - Tesztadatok után szeretnéd az éles adatgyűjtést elkezdeni
+      - Problémás szavazatok kerültek a rendszerbe

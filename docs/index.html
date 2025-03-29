@@ -321,6 +321,18 @@ flask run --host=0.0.0.0
                     <p>Ez a parancs elindítja a Flask webszervert. A <code>--host=0.0.0.0</code> paraméter lehetővé teszi, hogy az alkalmazás ne csak a localhost-ról, hanem a hálózat más eszközeiről is elérhető legyen. Ez különösen hasznos, ha más eszközökről (pl. mobiltelefon, tablet vagy más számítógép) is szeretnéd elérni az alkalmazást ugyanazon a hálózaton belül.</p>
                 </div>
             </div>
+            
+            <div class="card mt-3">
+                <div class="card-header bg-light"><code>python app.py reset-votes</code></div>
+                <div class="card-body">
+                    <p>Ez a parancs törli az összes eddigi szavazatot és visszaállítja az ELO pontszámokat az alapértelmezett értékre. Ezt akkor érdemes használni, ha:</p>
+                    <ul>
+                        <li>Teljesen új versenyt akarsz indítani</li>
+                        <li>Tesztadatok után szeretnéd az éles adatgyűjtést elkezdeni</li>
+                        <li>Problémás szavazatok kerültek a rendszerbe</li>
+                    </ul>
+                </div>
+            </div>
         </section>
 
         <section id="config" class="mb-5">
