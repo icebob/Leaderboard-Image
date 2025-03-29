@@ -375,6 +375,71 @@ K_FACTOR = 32       # K-faktor - a magasabb érték nagyobb változást eredmén
                 <li>Add hozzá a modellt a <code>config.py</code> fájl <code>MODELS</code> szótárához</li>
                 <li>Indítsd újra az alkalmazást, hogy az új modell megjelenjen a felületeken</li>
             </ol>
+            
+            <h4 class="mt-4"><i class="bi bi-file-earmark-image"></i> Rugalmas fájl kiterjesztések</h4>
+            <p>
+                A rendszer képes rugalmasan kezelni a képfájlok kiterjesztéseit. Ez azt jelenti, hogy:
+            </p>
+            <ul>
+                <li><i class="bi bi-check-circle-fill text-success"></i> Ugyanazon modell képei különböző kiterjesztésekkel szerepelhetnek különböző prompt mappákban</li>
+                <li><i class="bi bi-check-circle-fill text-success"></i> Támogatott kiterjesztések: <span class="badge bg-info">.jpg</span> <span class="badge bg-info">.jpeg</span> <span class="badge bg-info">.png</span></li>
+                <li><i class="bi bi-exclamation-triangle-fill text-warning"></i> A fájlnév alaprésze (kiterjesztés nélkül) mindig meg kell hogy egyezzen a konfigurációban beállítottal</li>
+            </ul>
+            
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle-fill"></i> <strong>Példa:</strong> Ha a <code>config.py</code> fájlban a <code>'Grok': 'grok'</code> beállítás szerepel, akkor a rendszer automatikusan megtalálja a <code>grok.jpg</code>, <code>grok.jpeg</code> vagy <code>grok.png</code> fájlokat a prompt mappákban.
+            </div>
+            
+            <div class="code-block">
+                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
+# Fontos: Ezek csak a fájlok alapnevei, a kiterjesztés dinamikusan lesz meghatározva
+MODELS = {
+    'Grok': 'grok',
+    'Google Gemini Flash': 'gemini-flash',
+    'Google Imagen 3': 'imagen3', 
+    'ChatGPT GPT 4o': 'gpt4o',
+    'Midjourney': 'midjourney',
+    'Reve': 'reve'
+}</code></pre>
+            </div>
+        </section>
+        
+        <section id="troubleshooting" class="mb-5">
+            <h2 class="border-bottom pb-2"><i class="bi bi-tools"></i> Hibaelhárítás</h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-light"><i class="bi bi-image-alt"></i> Képek nem jelennek meg</div>
+                        <div class="card-body">
+                            <p>Ha a képek nem jelennek meg:</p>
+                            <ol>
+                                <li>Ellenőrizd, hogy a fájlnevek megfelelnek-e a konfigurációban beállítottaknak</li>
+                                <li>Ellenőrizd, hogy a kiterjesztés a támogatottak között van-e (.jpg, .jpeg, .png)</li>
+                                <li>Ellenőrizd a böngésző konzolját hálózati hibákért</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-light"><i class="bi bi-database-x"></i> Adatbázis hibák</div>
+                        <div class="card-body">
+                            <p>Adatbázis problémák esetén:</p>
+                            <ol>
+                                <li>Próbáld meg törölni a <code>votes.db</code> fájlt és futtasd újra a <code>python database.py</code> parancsot</li>
+                                <li>Használd a <code>python app.py reset-votes</code> parancsot a szavazatok visszaállításához</li>
+                                <li>Ellenőrizd a terminál kimenetét a hibaüzenetekért</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-secondary mt-3" role="alert">
+                <i class="bi bi-terminal-fill"></i> <strong>Tipp:</strong> Az alkalmazás debug módban további információkat jelenít meg a konzolon. Ezek az információk segíthetnek a hibák azonosításában.
+            </div>
         </section>
     </main>
 
