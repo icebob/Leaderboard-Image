@@ -1,6 +1,7 @@
 import os
 import random
 import sqlite3
+import sys
 from flask import Flask, render_template, jsonify, request, send_from_directory, abort
 from database import get_db, init_db, get_prompt_ids, MODELS, update_elo
 from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO
@@ -30,6 +31,26 @@ def before_first_request_func():
        update_available_prompts()
     elif not AVAILABLE_PROMPTS: # Vagy ha még üres a lista
        update_available_prompts()
+
+# Szavazatok resetelésére szolgáló függvény
+def reset_votes():
+    """Törli az összes szavazatot és visszaállítja az ELO pontszámokat az alapértelmezettre."""
+    try:
+        db = get_db()
+        with db:
+            # Szavazatok törlése
+            db.execute('DELETE FROM votes')
+            # ELO pontszámok visszaállítása az alapértelmezettre
+            db.execute('UPDATE model_elo SET elo = ?', (DEFAULT_ELO,))
+            db.commit()
+        print("Sikeres adatbázis resetelés! Az összes szavazat törölve, ELO pontszámok visszaállítva.")
+        return True
+    except sqlite3.Error as e:
+        print(f"Adatbázis hiba a resetelés közben: {e}")
+        return False
+    except Exception as e:
+        print(f"Hiba a resetelés közben: {e}")
+        return False
 
 
 @app.route('/')
@@ -61,6 +82,7 @@ def serve_image(prompt_id, filename):
 
 
 # --- API Endpoints ---
+
 
 # Módosítás: Arena Battle mód - ne jelenítse meg a modellek nevét szavazás előtt
 @app.route('/api/battle_data')
@@ -242,6 +264,15 @@ def get_leaderboard():
 
 
 if __name__ == '__main__':
+    # Parancssori argumentumok kezelése
+    if len(sys.argv) > 1 and sys.argv[1] == 'reset-votes':
+        if reset_votes():
+            print("A szavazatok sikeresen törölve!")
+            sys.exit(0)
+        else:
+            print("Hiba történt a szavazatok törlése közben!")
+            sys.exit(1)
+    
     # Indítás előtt frissítjük a prompt listát
     update_available_prompts()
     # Debug mód fejlesztéshez, élesben False és használj pl. Gunicornt/Waitress-t
