@@ -82,7 +82,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- Mode Specific Functions ---
+    // Reset style function to remove highlighting from model names
+    function resetModelNameStyles() {
+        battleModel1Name.classList.remove('text-success');
+        battleModel2Name.classList.remove('text-success');
+        battleModel1Name.style.fontWeight = 'normal';
+        battleModel2Name.style.fontWeight = 'normal';
+    }
 
     // Battle Mode Logic
     async function loadBattleData() {
@@ -90,6 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
         battleImage1.src = "";
         battleImage2.src = "";
         battlePrompt.textContent = "Új prompt betöltése...";
+        
+        // Reset model name colors when loading new data
+        resetModelNameStyles();
         
         // Alapértelmezetten elrejtjük a modell neveket, szavazás előtt
         battleModel1Name.textContent = "Modell A";
@@ -143,6 +152,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Szavazás után megjelenítjük a modellek neveit, mielőtt új csatát töltenénk
             battleModel1Name.textContent = currentBattleData.model1.key;
             battleModel2Name.textContent = currentBattleData.model2.key;
+            
+            // Győztes modell nevének kiemelése zöld színnel
+            if (winner === currentBattleData.model1.key) {
+                battleModel1Name.classList.add('text-success');
+                battleModel1Name.style.fontWeight = 'bold';
+            } else if (winner === currentBattleData.model2.key) {
+                battleModel2Name.classList.add('text-success');
+                battleModel2Name.style.fontWeight = 'bold';
+            }
             
             // A szavazás utáni várakozási időt a konfigurációból olvassuk
             setTimeout(() => {
