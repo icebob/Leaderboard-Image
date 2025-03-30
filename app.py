@@ -5,7 +5,7 @@ import sys
 import glob
 from flask import Flask, render_template, jsonify, request, send_from_directory, abort
 from database import get_db, init_db, get_prompt_ids, update_elo
-from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO, MODELS
+from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO, MODELS, REVEAL_DELAY_MS
 
 app = Flask(__name__)
 app.config['DATA_DIR'] = DATA_DIR # Flask konfigurációban is tároljuk
@@ -88,7 +88,7 @@ def reset_votes():
 @app.route('/')
 def index():
     """Főoldal megjelenítése."""
-    return render_template('index.html', models=list(MODELS.keys()))
+    return render_template('index.html', models=list(MODELS.keys()), reveal_delay_ms=REVEAL_DELAY_MS)
 
 
 # Módosítás: Engedélyezzük a .jpeg kiterjesztést is

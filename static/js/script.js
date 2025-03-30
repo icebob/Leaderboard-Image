@@ -144,10 +144,10 @@ document.addEventListener('DOMContentLoaded', function() {
             battleModel1Name.textContent = currentBattleData.model1.key;
             battleModel2Name.textContent = currentBattleData.model2.key;
             
-            // Kis késleltetés, hogy a felhasználó láthassa a modellek neveit
+            // A szavazás utáni várakozási időt a konfigurációból olvassuk
             setTimeout(() => {
                 loadBattleData(); // Load next battle automatically
-            }, 1500); // 1.5 másodperc késleltetés
+            }, REVEAL_DELAY_MS); // Konfigurálható késleltetés
         } else {
             alert("Hiba történt a szavazás rögzítésekor.");
             disableVoting(false); // Re-enable buttons on error
@@ -176,10 +176,10 @@ document.addEventListener('DOMContentLoaded', function() {
             battleModel1Name.textContent = currentBattleData.model1.key;
             battleModel2Name.textContent = currentBattleData.model2.key;
             
-            // Kis késleltetés, hogy a felhasználó láthassa a modellek neveit
+            // A szavazás utáni várakozási időt a konfigurációból olvassuk
             setTimeout(() => {
                 loadBattleData();
-            }, 1500); // 1.5 másodperc késleltetés
+            }, REVEAL_DELAY_MS); // Konfigurálható késleltetés
         } else {
             loadBattleData();
         }
@@ -193,10 +193,10 @@ document.addEventListener('DOMContentLoaded', function() {
             battleModel1Name.textContent = currentBattleData.model1.key;
             battleModel2Name.textContent = currentBattleData.model2.key;
             
-            // Kis késleltetés, hogy a felhasználó láthassa a modellek neveit
+            // A szavazás utáni várakozási időt a konfigurációból olvassuk
             setTimeout(() => {
                 loadBattleData();
-            }, 1500); // 1.5 másodperc késleltetés
+            }, REVEAL_DELAY_MS); // Konfigurálható késleltetés
         } else {
             loadBattleData();
         }
