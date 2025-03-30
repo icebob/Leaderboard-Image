@@ -343,54 +343,6 @@ flask run --host=0.0.0.0
             </p>
             
             <div class="code-block">
-                <pre class="bg-light p-3 rounded"><code># Adatbázis fájl neve
-DATABASE = 'votes.db'
-
-# Az adatmappák elérési útja
-DATA_DIR = 'data'
-
-# Modell nevek és a hozzájuk tartozó fájlkiterjesztések/nevek
-MODELS = {
-    'grok': 'grok.jpg',
-    'gemini-flash': 'gemini-flash.jpeg',
-    'gemini-25pro': 'gemini-25pro.jpg',
-    'gpt4o': 'gpt4o.png',
-    'midjourney': 'midjourney.png'
-}
-
-# Engedélyezett képkiterjesztések listája
-ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png']
-
-# ELO Rating beállítások
-DEFAULT_ELO = 1500  # Alapértelmezett ELO érték új modellekhez
-K_FACTOR = 32       # K-faktor - a magasabb érték nagyobb változást eredményez</code></pre>
-            </div>
-            
-            <h4 class="mt-4">Új modell hozzáadása</h4>
-            <p>
-                Új modell hozzáadásához a következő lépéseket kell követni:
-            </p>
-            <ol>
-                <li>Helyezd el az új modell által generált képeket minden prompt mappában a megfelelő fájlnévkonvencióval</li>
-                <li>Add hozzá a modellt a <code>config.py</code> fájl <code>MODELS</code> szótárához</li>
-                <li>Indítsd újra az alkalmazást, hogy az új modell megjelenjen a felületeken</li>
-            </ol>
-            
-            <h4 class="mt-4"><i class="bi bi-file-earmark-image"></i> Rugalmas fájl kiterjesztések</h4>
-            <p>
-                A rendszer képes rugalmasan kezelni a képfájlok kiterjesztéseit. Ez azt jelenti, hogy:
-            </p>
-            <ul>
-                <li><i class="bi bi-check-circle-fill text-success"></i> Ugyanazon modell képei különböző kiterjesztésekkel szerepelhetnek különböző prompt mappákban</li>
-                <li><i class="bi bi-check-circle-fill text-success"></i> Támogatott kiterjesztések: <span class="badge bg-info">.jpg</span> <span class="badge bg-info">.jpeg</span> <span class="badge bg-info">.png</span></li>
-                <li><i class="bi bi-exclamation-triangle-fill text-warning"></i> A fájlnév alaprésze (kiterjesztés nélkül) mindig meg kell hogy egyezzen a konfigurációban beállítottal</li>
-            </ul>
-            
-            <div class="alert alert-info" role="alert">
-                <i class="bi bi-info-circle-fill"></i> <strong>Példa:</strong> Ha a <code>config.py</code> fájlban a <code>'Grok': 'grok'</code> beállítás szerepel, akkor a rendszer automatikusan megtalálja a <code>grok.jpg</code>, <code>grok.jpeg</code> vagy <code>grok.png</code> fájlokat a prompt mappákban.
-            </div>
-            
-            <div class="code-block">
                 <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
 # Fontos: Ezek csak a fájlok alapnevei, a kiterjesztés dinamikusan lesz meghatározva
 MODELS = {
@@ -401,6 +353,56 @@ MODELS = {
     'Midjourney': 'midjourney',
     'Reve': 'reve'
 }</code></pre>
+            </div>
+
+            <h4 class="mt-4"><i class="bi bi-hourglass-split"></i> Konfigurálható várakozási idő</h4>
+            <div class="alert alert-primary" role="alert">
+                <i class="bi bi-info-circle-fill"></i> <strong>Új funkció!</strong> Mostantól testreszabható a modellek neveinek megjelenítési ideje szavazás után.
+            </div>
+            
+            <p>
+                A rendszer konfigurálható várakozási idővel rendelkezik a szavazás után megjelenő modellek neveihez. Ez a változtatás a felhasználói élményt javítja, lehetővé téve a várakozási idő testreszabását.
+            </p>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light"><i class="bi bi-gear-fill"></i> Konfigurációs beállítás</div>
+                <div class="card-body">
+                    <p>A <code>config.py</code> fájlban található egy új beállítás:</p>
+                    <pre class="bg-light p-2 rounded"><code># Felhasználói élmény beállítások
+REVEAL_DELAY_MS = 1500  # Szavazás után a modellek neveinek megjelenítési ideje milliszekundumban</code></pre>
+                </div>
+            </div>
+            
+            <p>
+                A rendszer a következőképpen működik:
+            </p>
+            <ol>
+                <li>A <code>config.py</code> fájlban található <code>REVEAL_DELAY_MS = 1500</code> beállítás meghatározza, hogy mennyi ideig (milliszekundumban) jelenjenek meg a modellek nevei a szavazás után, mielőtt új képek betöltődnek.</li>
+                <li>Ez az érték átkerül az <code>app.py</code> fájlból a template-be, majd onnan a JavaScript kódba, ahol a korábbi hardcoded 1500 milliszekundumos értéket lecseréltük a konfigurációból érkező értékre.</li>
+                <li>Ezt a várakozási időt a JavaScript kód immár három helyen használja:
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill text-success"></i> A <code>handleVote</code> függvényben (normál szavazás esetén)</li>
+                        <li><i class="bi bi-check-circle-fill text-success"></i> A <code>tieBtn</code> eseménykezelőjében (döntetlen esetén)</li>
+                        <li><i class="bi bi-check-circle-fill text-success"></i> A <code>skipBtn</code> eseménykezelőjében (kihagyás esetén)</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="alert alert-success" role="alert">
+                <i class="bi bi-lightbulb-fill"></i> <strong>A módosítás előnyei:</strong>
+                <ul class="mb-0">
+                    <li>Egy helyen (a <code>config.py</code> fájlban) lehet módosítani a várakozási időt, és az mindenhol automatikusan frissül.</li>
+                    <li>A felhasználók igényeihez könnyen igazítható a megjelenítési idő:
+                        <ul>
+                            <li>Ha több időt szeretnének a nevek megtekintésére, növelhető az érték (pl. 3000 milliszekundumra)</li>
+                            <li>Ha gyorsabb ütemben szeretnének szavazni, csökkenthető az érték (pl. 1000 milliszekundumra)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="alert alert-info mt-3 mb-5" role="alert">
+                <i class="bi bi-wrench-adjustable"></i> <strong>Módosítás:</strong> Ha szeretnéd megváltoztatni a várakozási időt, csak a <code>config.py</code> fájlban kell átírnod a <code>REVEAL_DELAY_MS</code> értékét, majd újraindítanod az alkalmazást.
             </div>
         </section>
         
