@@ -25,4 +25,4 @@ DEFAULT_ELO = 1500  # Alapértelmezett ELO érték új modellekhez
 K_FACTOR = 32       # K-faktor - a magasabb érték nagyobb változást eredményez győzelemkor/vereségkor
 
 # Felhasználói élmény beállítások
-REVEAL_DELAY_MS = 1500  # Szavazás után a modellek neveinek megjelenítési ideje milliszekundumban
+REVEAL_DELAY_MS = 2500  # Szavazás után a modellek neveinek megjelenítési ideje milliszekundumban
