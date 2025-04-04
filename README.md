@@ -4,11 +4,12 @@
 
 ## 🚀 Áttekintés
 
-A Képgenerátor Aréna egy web-alapú alkalmazás, amely lehetővé teszi különböző AI képgenerátorok által létrehozott képek összehasonlítását és értékelését. A rendszer három fő módot kínál:
+A Képgenerátor Aréna egy web-alapú alkalmazás, amely lehetővé teszi különböző AI képgenerátorok által létrehozott képek összehasonlítását és értékelését. A rendszer négy fő módot kínál:
 
 - **Arena Battle:** Két kép közvetlen összehasonlítása, ahol a felhasználók a jobbnak ítélt képre szavazhatnak
 - **Side-by-Side:** Két kiválasztott modell képeinek összehasonlítása egymás mellett
 - **Leaderboard:** A modellek ranglistája az ELO pontszámok és egyéb statisztikák alapján
+- **ELO Fejlődés:** Grafikon, amely az egyes modellek ELO pontszámának időbeli változását mutatja
 
 ## ✨ Funkciók
 
@@ -62,6 +63,18 @@ A Side-by-Side módban a felhasználók maguk választhatják ki, melyik két mo
 
 A Leaderboard a modellek ranglistáját mutatja ELO pontszám szerint csökkenő sorrendben. A táblázat tartalmazza az ELO értékeket, a győzelmek számát, az összes mérkőzés számát és a győzelmi arányt.
 
+### 4. ELO Fejlődés
+
+Az ELO Fejlődés nézet egy interaktív vonaldiagramot kínál, amely megjeleníti a modellek ELO pontszámának változását az idő múlásával. Ez lehetővé teszi a felhasználók számára, hogy nyomon kövessék, hogyan teljesítenek a modellek hosszabb időtávon.
+
+Főbb jellemzők:
+- Minden modellhez külön színezett vonal
+- Interaktív információs dobozok a pontos értékek megjelenítésére
+- Időalapú x-tengely a fejlődés kronológiai nyomon követéséhez
+- Frissítési lehetőség a legfrissebb adatok betöltéséhez
+
+![ELO Fejlődés](docs/images/elo-history.png)
+
 ## ⚙️ Parancssori funkciók
 
 ### Szavazatok resetelése
@@ -74,6 +87,8 @@ Ez a parancs törli az összes eddigi szavazatot és visszaállítja az ELO pont
 - Teljesen új versenyt akarsz indítani
 - Tesztadatok után szeretnéd az éles adatgyűjtést elkezdeni
 - Problémás szavazatok kerültek a rendszerbe
+
+**Fontos:** A parancs az `elo_history` tábla tartalmát is törli, így a grafikon is tiszta lappal indul újra. Az ELO fejlődés grafikonon minden modell újra az alapértelmezett ELO pontszámról (1500) fog indulni.
 
 ## 📁 Rugalmas fájlkezelés
 
@@ -105,6 +120,46 @@ MODELS = {
 - ChatGPT GPT 4o
 - Midjourney
 - Reve
+
+## 🗄️ Adatbázis struktúra
+
+A rendszer három fő táblát használ:
+
+1. **votes** - A felhasználói szavazatok tárolására
+   ```
+   id INTEGER PRIMARY KEY
+   prompt_id TEXT
+   winner TEXT
+   loser TEXT
+   voted_at TIMESTAMP
+   ```
+
+2. **model_elo** - A modellek aktuális ELO pontszámainak tárolására
+   ```
+   model TEXT PRIMARY KEY
+   elo REAL
+   last_updated TIMESTAMP
+   ```
+
+3. **elo_history** - Az ELO pontszámok változásának történeti nyomon követésére
+   ```
+   id INTEGER PRIMARY KEY
+   model TEXT
+   elo REAL
+   timestamp TIMESTAMP
+   ```
+
+## 🔌 API végpontok
+
+A rendszer a következő API végpontokat biztosítja:
+
+| Végpont | Metódus | Leírás |
+|---------|---------|--------|
+| `/api/battle_data` | GET | Véletlenszerűen kiválaszt két modellt és egy promptot, visszaadja a szükséges képek URL-jeit a csatához. |
+| `/api/side_by_side_data` | GET | Két megadott modellhez és egy véletlenszerű prompthoz visszaadja a képek URL-jeit. |
+| `/api/vote` | POST | Rögzíti a felhasználó szavazatát és frissíti az ELO értékeket. |
+| `/api/leaderboard` | GET | Visszaadja az aktuális Leaderboard adatokat (ELO, győzelmek, meccsek, arányok). |
+| `/api/elo_history` | GET | Visszaadja az ELO értékek időbeli változásait a modellek grafikonos megjelenítéséhez. |
 
 ## 📝 Licenc
 
