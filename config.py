@@ -13,9 +13,11 @@ MODELS = {
     'Google Gemini Flash': 'gemini-flash',
     'Google Imagen 3': 'imagen3',
     'ChatGPT GPT 4o': 'gpt4o',
-    'Midjourney': 'midjourney',
-    'Reve': 'reve'#,
-    #'Ideogram 3': 'ideogram'
+    'Midjourney v6.1': 'midjourneyv61',
+    'Midjourney v7': 'midjourneyv7',
+    'Reve': 'reve',
+    #'Ideogram 3': 'ideogram3',
+    #'Flux 11 Ultra': 'flux11ultra'
 }
 
 # Engedélyezett képkiterjesztések listája
