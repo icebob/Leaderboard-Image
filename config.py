@@ -14,8 +14,8 @@ MODELS = {
     'Google Imagen 3': 'imagen3',
     'ChatGPT GPT 4o': 'gpt4o',
     'Midjourney': 'midjourney',
-    'Reve': 'reve',
-    'Ideogram 3': 'ideogram'
+    'Reve': 'reve'#,
+    #'Ideogram 3': 'ideogram'
 }
 
 # Engedélyezett képkiterjesztések listája
