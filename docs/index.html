@@ -364,15 +364,18 @@ flask run --host=0.0.0.0
                 </div>
             </div>
             
-            <div class="card mt-3">
+            <div class="card">
                 <div class="card-header bg-light"><code>python app.py reset-votes</code></div>
                 <div class="card-body">
-                    <p>Ez a parancs törli az összes eddigi szavazatot és visszaállítja az ELO pontszámokat az alapértelmezett értékre. Ezt akkor érdemes használni, ha:</p>
+                    <p>Ez a parancs törli az összes eddigi szavazatot, ELO történeti adatot és visszaállítja az ELO pontszámokat az alapértelmezett értékre. Ezt akkor érdemes használni, ha:</p>
                     <ul>
                         <li>Teljesen új versenyt akarsz indítani</li>
                         <li>Tesztadatok után szeretnéd az éles adatgyűjtést elkezdeni</li>
                         <li>Problémás szavazatok kerültek a rendszerbe</li>
                     </ul>
+                    <div class="alert alert-info mt-2">
+                        <i class="bi bi-info-circle-fill"></i> <strong>Fontos:</strong> A parancs most már az <code>elo_history</code> tábla tartalmát is törli, így a grafikon is tiszta lappal indul újra. Az ELO fejlődés grafikonon minden modell újra az alapértelmezett ELO pontszámról (1500) fog indulni.
+                    </div>
                 </div>
             </div>
         </section>
