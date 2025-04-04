@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const modes = ['battle', 'side-by-side', 'leaderboard'];
+    const modes = ['battle', 'side-by-side', 'leaderboard', 'elo-history']; // Add elo-history mode
     const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
     const loadingIndicator = document.getElementById('loading-indicator');
 
@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const leaderboardModeDiv = document.getElementById('leaderboard-mode');
     const leaderboardTableBody = document.getElementById('leaderboard-table-body');
     const refreshLeaderboardBtn = document.getElementById('refresh-leaderboard-btn');
+
+    // ELO History Mode Elements
+    const eloHistoryModeDiv = document.getElementById('elo-history-mode');
+    const eloHistoryChartCanvas = document.getElementById('eloHistoryChart');
+    const refreshHistoryBtn = document.getElementById('refresh-history-btn');
+    let eloHistoryChart = null; // Variable to hold the chart instance
 
     // --- Utility Functions ---
     function showLoading() {
@@ -294,6 +300,116 @@ document.addEventListener('DOMContentLoaded', function() {
      refreshLeaderboardBtn.addEventListener('click', loadLeaderboardData);
 
 
+    // ELO History Mode Logic
+    async function loadEloHistoryData() {
+        showLoading();
+        refreshHistoryBtn.disabled = true;
+        const data = await fetchData('/api/elo_history');
+        hideLoading(); // Hide loading indicator after fetch
+        
+        if (data) {
+            renderEloHistoryChart(data);
+        } else {
+            // Handle error - maybe display a message on the canvas or an alert
+            console.error("Hiba az ELO előzmények betöltése közben.");
+            if (eloHistoryChart) {
+                eloHistoryChart.destroy(); // Clear previous chart if error
+            }
+            const ctx = eloHistoryChartCanvas.getContext('2d');
+            ctx.clearRect(0, 0, eloHistoryChartCanvas.width, eloHistoryChartCanvas.height);
+            ctx.textAlign = 'center';
+            ctx.fillText('Hiba a grafikon adatainak betöltése közben.', eloHistoryChartCanvas.width / 2, eloHistoryChartCanvas.height / 2);
+        }
+        refreshHistoryBtn.disabled = false;
+    }
+
+    function renderEloHistoryChart(apiData) {
+        if (eloHistoryChart) {
+            eloHistoryChart.destroy(); // Destroy previous chart instance if exists
+        }
+        
+        const datasets = [];
+        const modelColors = {}; // Store colors for consistency
+        const colorPalette = [
+            '#0d6efd', '#6f42c1', '#d63384', '#fd7e14', '#ffc107', 
+            '#198754', '#20c997', '#0dcaf0', '#6c757d', '#adb5bd'
+        ];
+        let colorIndex = 0;
+
+        for (const model in apiData) {
+            if (!modelColors[model]) {
+                modelColors[model] = colorPalette[colorIndex % colorPalette.length];
+                colorIndex++;
+            }
+            
+            datasets.push({
+                label: model,
+                data: apiData[model],
+                borderColor: modelColors[model],
+                backgroundColor: modelColors[model] + '33', // Semi-transparent fill
+                tension: 0.1, // Smooth lines slightly
+                fill: false, // Don't fill area under the line by default
+                parsing: {
+                    xAxisKey: 'x', // Tell Chart.js which property is for the x-axis
+                    yAxisKey: 'y'  // Tell Chart.js which property is for the y-axis
+                }
+            });
+        }
+
+        const ctx = eloHistoryChartCanvas.getContext('2d');
+        eloHistoryChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Modellek ELO Pontszámának Változása az Időben'
+                    },
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day', // Adjust based on data density (e.g., 'hour', 'week')
+                            tooltipFormat: 'yyyy. MM. dd. HH:mm', // Format for tooltips
+                            displayFormats: {
+                                day: 'yyyy. MM. dd.' // Format for axis labels
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Dátum'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'ELO Pontszám'
+                        },
+                        beginAtZero: false // ELO can be high, no need to start at 0
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    refreshHistoryBtn.addEventListener('click', loadEloHistoryData);
+
     // --- Navigation ---
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -303,19 +419,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Load initial data for the selected mode
             if (mode === 'battle') {
-                // Only load if it hasn't been loaded yet or needs refresh
                 if (!currentBattleData) loadBattleData();
             } else if (mode === 'side-by-side') {
-                 // Initialize selection but don't auto-load
-                 updateSbsSelection();
-                 // Clear previous results if any
-                 if(sbsImage1.src || sbsImage2.src) {
-                    sbsPrompt.textContent = "Válassz modelleket és kattints a Betöltés gombra...";
-                    sbsImage1.src = "";
-                    sbsImage2.src = "";
-                 }
+                updateSbsSelection();
+                if(sbsImage1.src || sbsImage2.src) {
+                   sbsPrompt.textContent = "Válassz modelleket és kattints a Betöltés gombra...";
+                   sbsImage1.src = "";
+                   sbsImage2.src = "";
+                }
             } else if (mode === 'leaderboard') {
                 loadLeaderboardData();
+            } else if (mode === 'elo-history') { // Load data when switching to history mode
+                loadEloHistoryData();
             }
         });
     });

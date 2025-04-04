@@ -205,6 +205,32 @@
                     </div>
                 </div>
             </div>
+
+            <div class="mode-section mt-4">
+                <h3><i class="bi bi-graph-up"></i> ELO Fejlődés</h3>
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p>
+                            Az ELO Fejlődés nézet egy időalapú grafikont kínál, amely megjeleníti a modellek ELO pontszámának változását az idő múlásával. Ez lehetővé teszi a felhasználók számára, hogy nyomon kövessék, hogyan teljesítenek a modellek hosszabb időtávon.
+                        </p>
+                        <p>
+                            <strong>Főbb jellemzők:</strong>
+                        </p>
+                        <ul>
+                            <li>Interaktív vonaldiagram az összes modell ELO pontszámának időbeli változásával</li>
+                            <li>Modellenként különböző színek az egyszerű azonosításhoz</li>
+                            <li>Lebegő szövegdobozok a pontos ELO értékek és időbélyegek megtekintéséhez</li>
+                            <li>Frissítési funkció az adatok naprakészen tartásához</li>
+                        </ul>
+                        <p>
+                            Ez a funkció különösen hasznos annak elemzéséhez, hogy a modellek idővel fejlődnek-e, valamint annak megfigyeléséhez, hogy az új modellek hogyan illeszkednek be a rangsorba.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="images/elo-history.png" alt="ELO Fejlődés mód képernyőképe" class="img-fluid rounded shadow-sm">
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="technicals" class="mb-5">
@@ -229,7 +255,7 @@
                 </div>
                 <div class="col-md-6">
                     <h4>Adatbázis struktúra</h4>
-                    <p>A rendszer két fő táblát használ:</p>
+                    <p>A rendszer három fő táblát használ:</p>
                     
                     <div class="card mb-3">
                         <div class="card-header bg-light">votes tábla</div>
@@ -244,7 +270,7 @@
                         </div>
                     </div>
                     
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-header bg-light">model_elo tábla</div>
                         <div class="card-body">
                             <code>
@@ -252,6 +278,21 @@
                                 elo REAL<br>
                                 last_updated TIMESTAMP
                             </code>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-light">elo_history tábla</div>
+                        <div class="card-body">
+                            <code>
+                                id INTEGER PRIMARY KEY<br>
+                                model TEXT<br>
+                                elo REAL<br>
+                                timestamp TIMESTAMP
+                            </code>
+                            <p class="mt-2 mb-0 small text-muted">
+                                Ez a tábla tárolja az ELO pontszámok változásának történetét a modellek időbeli fejlődésének követéséhez.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -280,7 +321,7 @@ static/           # Statikus fájlok
         </section>
 
         <section id="installation" class="mb-5">
-            <h2 class="border-bottom pb-2">Telepítés és indítás</h2>
+            <h2 class="border-bottom pb-2">Telepítés és indítás</h4>
             
             <h4>Követelmények</h4>
             <ul>
@@ -442,6 +483,111 @@ REVEAL_DELAY_MS = 1500  # Szavazás után a modellek neveinek megjelenítési id
             
             <div class="alert alert-secondary mt-3" role="alert">
                 <i class="bi bi-terminal-fill"></i> <strong>Tipp:</strong> Az alkalmazás debug módban további információkat jelenít meg a konzolon. Ezek az információk segíthetnek a hibák azonosításában.
+            </div>
+        </section>
+
+        <section id="api-endpoints" class="mb-5">
+            <h2 class="border-bottom pb-2">API végpontok</h2>
+            
+            <p>A rendszer a következő fő API végpontokat biztosítja:</p>
+            
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Végpont</th>
+                            <th>Metódus</th>
+                            <th>Leírás</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/battle_data</code></td>
+                            <td>GET</td>
+                            <td>Véletlenszerűen kiválaszt két modellt és egy promptot, visszaadja a szükséges képek URL-jeit a csatához.</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/side_by_side_data</code></td>
+                            <td>GET</td>
+                            <td>Két megadott modellhez és egy véletlenszerű prompthoz visszaadja a képek URL-jeit.</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/vote</code></td>
+                            <td>POST</td>
+                            <td>Rögzíti a felhasználó szavazatát és frissíti az ELO értékeket.</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/leaderboard</code></td>
+                            <td>GET</td>
+                            <td>Visszaadja az aktuális Leaderboard adatokat (ELO, győzelmek, meccsek, arányok).</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/elo_history</code></td>
+                            <td>GET</td>
+                            <td>Visszaadja az ELO értékek időbeli változásait a modellek grafikonos megjelenítéséhez.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h4 class="mt-4">Kiemelt API végpont: ELO Fejlődés</h4>
+            <div class="card">
+                <div class="card-header bg-light d-flex align-items-center">
+                    <span class="badge bg-success me-2">GET</span>
+                    <code>/api/elo_history</code>
+                </div>
+                <div class="card-body">
+                    <p>Ez az új API végpont az összes modell ELO pontszámainak történeti adatait szolgáltatja időbélyegekkel együtt.</p>
+                    
+                    <h5>Válasz formátum:</h5>
+                    <pre class="bg-light p-3 rounded"><code>{
+  "Grok": [
+    { "x": "2025-04-01T12:30:45", "y": 1500 },
+    { "x": "2025-04-01T14:15:20", "y": 1524.3 },
+    { "x": "2025-04-02T09:45:12", "y": 1545.7 }
+  ],
+  "Google Gemini Flash": [
+    { "x": "2025-04-01T12:30:45", "y": 1500 },
+    { "x": "2025-04-01T14:15:20", "y": 1475.7 },
+    { "x": "2025-04-02T09:45:12", "y": 1492.1 }
+  ],
+  // ... további modellek adatai ...
+}</code></pre>
+                    
+                    <h5>Felhasználás a kódban:</h5>
+                    <p>A frontend JavaScript kód a Chart.js könyvtárat használja az adatok vizualizálásához:</p>
+                    <pre class="bg-light p-3 rounded"><code>// JavaScript - ELO előzmények grafikonjának renderelése
+function renderEloHistoryChart(apiData) {
+    // Chart.js konfiguráció - minden modellhez külön vonalat rajzol
+    const datasets = [];
+    for (const model in apiData) {
+        datasets.push({
+            label: model,
+            data: apiData[model],
+            borderColor: getColorForModel(model),
+            tension: 0.1
+        });
+    }
+    
+    // Chart.js inicializálása időalapú x-tengellyel
+    const ctx = document.getElementById('eloHistoryChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day',
+                        tooltipFormat: 'yyyy. MM. dd. HH:mm'
+                    }
+                }
+            }
+        }
+    });
+}</code></pre>
+                </div>
             </div>
         </section>
     </main>

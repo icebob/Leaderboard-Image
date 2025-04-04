@@ -308,6 +308,38 @@ def get_leaderboard():
         print(f"Error fetching leaderboard: {e}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+@app.route('/api/elo_history')
+def get_elo_history():
+    """Lekérdezi az ELO értékek időbeli változását a grafikonhoz."""
+    try:
+        db = get_db()
+        cursor = db.execute('''
+            SELECT model, elo, timestamp 
+            FROM elo_history 
+            ORDER BY timestamp ASC
+        ''')
+        history_data = cursor.fetchall()
+        
+        # Adatok átalakítása a grafikonhoz megfelelő formátumba
+        # { model1: [{x: timestamp, y: elo}, ...], model2: [...] }
+        chart_data = {}
+        for row in history_data:
+            model = row['model']
+            if model not in chart_data:
+                chart_data[model] = []
+            chart_data[model].append({
+                'x': row['timestamp'],
+                'y': round(row['elo'], 1)
+            })
+            
+        return jsonify(chart_data)
+    except sqlite3.Error as e:
+        print(f"Database error fetching ELO history: {e}")
+        return jsonify({"error": "Database error while fetching ELO history"}), 500
+    except Exception as e:
+        print(f"Error fetching ELO history: {e}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
 
 if __name__ == '__main__':
     # Parancssori argumentumok kezelése

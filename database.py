@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import math
+import datetime
 from config import DATABASE, DATA_DIR, MODELS, DEFAULT_ELO, K_FACTOR
 
 # ELO rating számítás függvényei
@@ -45,25 +46,33 @@ def get_current_elo(db, model_name):
 
 def update_elo(db, winner_model, loser_model):
     """
-    Frissíti a nyertes és vesztes modellek ELO értékét egy mérkőzés után.
+    Frissíti a nyertes és vesztes modellek ELO értékét egy mérkőzés után,
+    és rögzíti a változást a historikus táblában.
     """
-    # Lekérdezzük a jelenlegi ELO értékeket
+# Lekérdezzük a jelenlegi ELO értékeket
+# Lekérdezzük a jelenlegi ELO értékeket
     winner_elo = get_current_elo(db, winner_model)
     loser_elo = get_current_elo(db, loser_model)
     
-    # Várható eredmények számítása
     winner_expected = calculate_expected_score(winner_elo, loser_elo)
     loser_expected = calculate_expected_score(loser_elo, winner_elo)
     
-    # Új ELO értékek számítása
+# Új ELO értékek számítása
     winner_new_elo = calculate_new_elo(winner_elo, winner_expected, 1)
     loser_new_elo = calculate_new_elo(loser_elo, loser_expected, 0)
     
-    # Értékek frissítése az adatbázisban
-    db.execute('UPDATE model_elo SET elo = ? WHERE model = ?', 
-              (winner_new_elo, winner_model))
-    db.execute('UPDATE model_elo SET elo = ? WHERE model = ?', 
-              (loser_new_elo, loser_model))
+    # Értékek frissítése az adatbázisban (model_elo)
+    current_timestamp = datetime.datetime.now()
+    db.execute('UPDATE model_elo SET elo = ?, last_updated = ? WHERE model = ?', 
+              (winner_new_elo, current_timestamp, winner_model))
+    db.execute('UPDATE model_elo SET elo = ?, last_updated = ? WHERE model = ?', 
+              (loser_new_elo, current_timestamp, loser_model))
+              
+    # Változás rögzítése a historikus táblában (elo_history)
+    db.execute('INSERT INTO elo_history (model, elo, timestamp) VALUES (?, ?, ?)',
+              (winner_model, winner_new_elo, current_timestamp))
+    db.execute('INSERT INTO elo_history (model, elo, timestamp) VALUES (?, ?, ?)',
+              (loser_model, loser_new_elo, current_timestamp))
     
     return winner_new_elo, loser_new_elo
 
@@ -75,10 +84,13 @@ def get_db():
 
 def init_db():
     """Adatbázis séma inicializálása (ha még nem létezik)."""
-    if not os.path.exists(DATABASE):
-        print("Initializing database...")
-        db = get_db()
-        with db:
+    db = get_db()
+    tables_exist = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND (name='votes' OR name='model_elo' OR name='elo_history')").fetchall()
+    table_names = {row['name'] for row in tables_exist}
+
+    with db:
+        if 'votes' not in table_names:
+            print("Creating votes table...")
             db.execute('''
                 CREATE TABLE votes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,14 +100,11 @@ def init_db():
                     voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
-            db.execute('''
-                CREATE INDEX idx_winner ON votes (winner);
-            ''')
-            db.execute('''
-                CREATE INDEX idx_loser ON votes (loser);
-            ''')
-            
-            # ELO értékek tárolására szolgáló tábla
+            db.execute('CREATE INDEX idx_winner ON votes (winner);')
+            db.execute('CREATE INDEX idx_loser ON votes (loser);')
+
+        if 'model_elo' not in table_names:
+            print("Creating model_elo table...")
             db.execute('''
                 CREATE TABLE model_elo (
                     model TEXT PRIMARY KEY,
@@ -103,33 +112,40 @@ def init_db():
                     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
-            
             # Kezdeti ELO értékek minden modellhez
             for model in MODELS.keys():
-                db.execute('INSERT INTO model_elo (model, elo) VALUES (?, ?)', 
+                db.execute('INSERT OR IGNORE INTO model_elo (model, elo) VALUES (?, ?)', 
                           (model, DEFAULT_ELO))
-                
-        print("Database initialized.")
-    else:
-        # Ellenőrizzük, hogy az ELO tábla létezik-e, és ha nem, létrehozzuk
-        db = get_db()
-        with db:
-            # Ellenőrizzük, hogy létezik-e már az ELO tábla
-            result = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='model_elo'").fetchone()
-            if not result:
-                print("Creating ELO rating table...")
-                db.execute('''
-                    CREATE TABLE model_elo (
-                        model TEXT PRIMARY KEY,
-                        elo REAL NOT NULL,
-                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                ''')
-                # Kezdeti ELO értékek minden modellhez
-                for model in MODELS.keys():
-                    db.execute('INSERT INTO model_elo (model, elo) VALUES (?, ?)', 
-                              (model, DEFAULT_ELO))
-        print("Database already exists.")
+        else:
+            # Biztosítjuk, hogy minden modell szerepeljen az ELO táblában
+            for model in MODELS.keys():
+                 db.execute('INSERT OR IGNORE INTO model_elo (model, elo) VALUES (?, ?)', 
+                           (model, DEFAULT_ELO))
+
+        if 'elo_history' not in table_names:
+            print("Creating elo_history table...")
+            db.execute('''
+                CREATE TABLE elo_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    model TEXT NOT NULL,
+                    elo REAL NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            db.execute('CREATE INDEX idx_history_model_time ON elo_history (model, timestamp);')
+            # Kezdeti ELO értékek rögzítése a historikus táblában is
+            for model in MODELS.keys():
+                db.execute('INSERT INTO elo_history (model, elo) VALUES (?, ?)', 
+                          (model, DEFAULT_ELO))
+        else:
+             # Biztosítjuk, hogy minden modellnek legyen legalább egy kezdeti bejegyzése a historikus táblában
+             for model in MODELS.keys():
+                 exists = db.execute('SELECT 1 FROM elo_history WHERE model = ? LIMIT 1', (model,)).fetchone()
+                 if not exists:
+                     db.execute('INSERT INTO elo_history (model, elo) VALUES (?, ?)', 
+                               (model, DEFAULT_ELO))
+
+    print("Database initialization check complete.")
 
 def get_prompt_ids():
     """Visszaadja az érvényes prompt ID-k (mappa nevek) listáját."""
