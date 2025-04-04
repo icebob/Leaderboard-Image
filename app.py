@@ -3,6 +3,7 @@ import random
 import sqlite3
 import sys
 import glob
+import datetime
 from flask import Flask, render_template, jsonify, request, send_from_directory, abort
 from database import get_db, init_db, get_prompt_ids, update_elo
 from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO, MODELS, REVEAL_DELAY_MS
@@ -72,10 +73,21 @@ def reset_votes():
         with db:
             # Szavazatok törlése
             db.execute('DELETE FROM votes')
+            
+            # ELO történeti adatok törlése
+            db.execute('DELETE FROM elo_history')
+            
             # ELO pontszámok visszaállítása az alapértelmezettre
             db.execute('UPDATE model_elo SET elo = ?', (DEFAULT_ELO,))
+            
+            # Kezdeti ELO értékek rögzítése a historikus táblában is
+            current_timestamp = datetime.datetime.now()
+            for model in MODELS.keys():
+                db.execute('INSERT INTO elo_history (model, elo, timestamp) VALUES (?, ?, ?)', 
+                          (model, DEFAULT_ELO, current_timestamp))
+            
             db.commit()
-        print("Sikeres adatbázis resetelés! Az összes szavazat törölve, ELO pontszámok visszaállítva.")
+        print("Sikeres adatbázis resetelés! Az összes szavazat és ELO előzmény törölve, ELO pontszámok visszaállítva.")
         return True
     except sqlite3.Error as e:
         print(f"Adatbázis hiba a resetelés közben: {e}")
