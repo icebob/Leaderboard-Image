@@ -150,10 +150,9 @@
                         </p>
                         <p>
                             <strong>Különleges funkció:</strong> A modellek nevei csak a szavazás után jelennek meg, így biztosítva az elfogulatlan értékelést.
-                        </p>
-                        <ul>
+                        </p>                        <ul>
                             <li>A szavazás után a rendszer frissíti az ELO értékeket</li>
-                            <li>A modellek nevei 1,5 másodpercre láthatóvá válnak a szavazás után</li>
+                            <li>A modellek nevei 2,5 másodpercre láthatóvá válnak a szavazás után</li>
                             <li>Automatikusan betöltődik a következő összecsapás</li>
                         </ul>
                     </div>
@@ -388,16 +387,19 @@ flask run --host=0.0.0.0
                 A rendszer konfigurációs beállításai a <code>config.py</code> fájlban találhatók. Itt módosíthatók a következő beállítások:
             </p>
             
-            <div class="code-block">
-                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
+            <div class="code-block">                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
 # Fontos: Ezek csak a fájlok alapnevei, a kiterjesztés dinamikusan lesz meghatározva
 MODELS = {
     'Grok': 'grok',
     'Google Gemini Flash': 'gemini-flash',
     'Google Imagen 3': 'imagen3', 
     'ChatGPT GPT 4o': 'gpt4o',
-    'Midjourney': 'midjourney',
-    'Reve': 'reve'
+    'Midjourney v6.1': 'midjourneyv61',
+    'Midjourney v7': 'midjourneyv7',
+    'Reve': 'reve',
+    'HiDreamI1': 'hidreami1'
+    #'Ideogram 3': 'ideogram3',
+    #'Flux 11 Ultra': 'flux11ultra'
 }</code></pre>
             </div>
 
@@ -413,9 +415,8 @@ MODELS = {
             <div class="card mb-4">
                 <div class="card-header bg-light"><i class="bi bi-gear-fill"></i> Konfigurációs beállítás</div>
                 <div class="card-body">
-                    <p>A <code>config.py</code> fájlban található egy új beállítás:</p>
-                    <pre class="bg-light p-2 rounded"><code># Felhasználói élmény beállítások
-REVEAL_DELAY_MS = 1500  # Szavazás után a modellek neveinek megjelenítési ideje milliszekundumban</code></pre>
+                    <p>A <code>config.py</code> fájlban található egy új beállítás:</p>                    <pre class="bg-light p-2 rounded"><code># Felhasználói élmény beállítások
+REVEAL_DELAY_MS = 2500  # Szavazás után a modellek neveinek megjelenítési ideje milliszekundumban</code></pre>
                 </div>
             </div>
             
