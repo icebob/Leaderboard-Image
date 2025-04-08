@@ -190,29 +190,38 @@ function renderEloHistoryChart(apiData) {
                         }
                     }
                 }
-            },
-            scales: {
+            },            scales: {
                 x: {
                     type: 'time',
+                    adapters: {
+                        date: {
+                            locale: 'hu'
+                        }
+                    },
                     time: {
-                        minUnit: 'hour',
+                        unit: 'auto',
+                        minUnit: 'minute',
                         displayFormats: {
+                            minute: 'HH:mm',
                             hour: 'HH:mm',
                             day: 'MM.dd.',
                             week: 'yyyy.MM.dd.',
                             month: 'yyyy.MM.'
-                        }
+                        },
+                        tooltipFormat: 'yyyy.MM.dd. HH:mm'
                     },
                     ticks: {
-                        source: 'auto',
                         maxRotation: 45,
-                        autoSkip: true,
+                        source: 'auto',
+                        maxTicksLimit: 15,
                         callback: function(value) {
                             const date = new Date(value);
-                            const format = 
-                                date.getHours() === 0 ? 'yyyy.MM.dd.' :
-                                'HH:mm';
-                            return formatDate(date, format);
+                            // Ha éjfél, akkor teljes dátumot mutatunk
+                            if (date.getHours() === 0 && date.getMinutes() === 0) {
+                                return formatDate(date, 'yyyy.MM.dd.');
+                            }
+                            // Egyébként csak az időt
+                            return formatDate(date, 'HH:mm');
                         }
                     }
                 },
@@ -241,4 +250,6 @@ function renderEloHistoryChart(apiData) {
 // Event listeners
 function initEloHistoryMode() {
     refreshHistoryBtn.addEventListener('click', loadEloHistoryData);
+    // Kezdeti betöltés
+    //loadEloHistoryData();
 }
