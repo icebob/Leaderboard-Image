@@ -16,6 +16,7 @@ MODELS = {
     'Midjourney v6.1': 'midjourneyv61',
     'Midjourney v7': 'midjourneyv7',
     'Reve': 'reve',
+    'HiDream-I1':'hidreami1'
     #'Ideogram 3': 'ideogram3',
     #'Flux 11 Ultra': 'flux11ultra'
 }
