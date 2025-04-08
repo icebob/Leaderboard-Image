@@ -63,6 +63,8 @@ A Side-by-Side módban a felhasználók maguk választhatják ki, melyik két mo
 
 A Leaderboard a modellek ranglistáját mutatja ELO pontszám szerint csökkenő sorrendben. A táblázat tartalmazza az ELO értékeket, a győzelmek számát, az összes mérkőzés számát és a győzelmi arányt.
 
+![Leaderboard](docs/images/leaderboard.png)
+
 ### 4. ELO Fejlődés
 
 Az ELO Fejlődés nézet egy interaktív vonaldiagramot kínál, amely megjeleníti a modellek ELO pontszámának változását az idő múlásával. Ez lehetővé teszi a felhasználók számára, hogy nyomon kövessék, hogyan teljesítenek a modellek hosszabb időtávon.
