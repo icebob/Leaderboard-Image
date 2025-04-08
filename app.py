@@ -11,6 +11,11 @@ from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO, MODELS, REVEAL_DEL
 app = Flask(__name__)
 app.config['DATA_DIR'] = DATA_DIR # Flask konfigurációban is tároljuk
 
+@app.route('/static/js/<path:filename>')
+def serve_js(filename):
+    """Serve JavaScript files with proper MIME type for ES modules."""
+    return send_from_directory('static/js', filename, mimetype='application/javascript')
+
 # Statikus fájlok kiszolgálása a node_modules mappából
 @app.route('/node_modules/<path:filename>')
 def serve_node_modules(filename):
