@@ -119,8 +119,10 @@ MODELS = {
 - Google Gemini Flash
 - Google Imagen 3
 - ChatGPT GPT 4o
-- Midjourney
+- Midjourney v6.1
+- Midjourney v7
 - Reve
+- HiDreamI1
 
 ## 🗄️ Adatbázis struktúra
 
