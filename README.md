@@ -108,7 +108,8 @@ MODELS = {
     'ChatGPT GPT 4o': 'gpt4o',
     'Midjourney v6.1': 'midjourneyv61',
     'Midjourney v7': 'midjourneyv7',
-    'Reve': 'reve'
+    'Reve': 'reve',
+    'HiDreamI1': 'hidreami1'
 }
 ```
 
