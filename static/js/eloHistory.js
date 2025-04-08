@@ -1,241 +1,140 @@
 import { fetchData } from './api.js';
 import { colorPalette } from './config.js';
 
-// DOM elemek
 const eloHistoryChartCanvas = document.getElementById('eloHistoryChart');
 const refreshHistoryBtn = document.getElementById('refresh-history-btn');
 let eloHistoryChart = null;
 
-// Dátum formázó függvények - natív JavaScript-tel
 function formatDate(date, formatStr) {
-    if (typeof date === 'string') {
-        date = new Date(date);
-    }
-    
+    if (typeof date === 'string') date = new Date(date);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    if (formatStr === 'yyyy.MM.dd. HH:mm') {
-        return `${year}.${month}.${day}. ${hours}:${minutes}`;
-    } else if (formatStr === 'yyyy.MM.dd.') {
-        return `${year}.${month}.${day}.`;
-    } else if (formatStr === 'MM.dd.') {
-        return `${month}.${day}.`;
-    } else if (formatStr === 'HH:mm') {
-        return `${hours}:${minutes}`;
-    } else if (formatStr === 'yyyy.MM.') {
-        return `${year}.${month}.`;
-    }
-    
+    if (formatStr === 'yyyy.MM.dd. HH:mm') return `${year}.${month}.${day}. ${hours}:${minutes}`;
+    if (formatStr === 'yyyy.MM.dd.') return `${year}.${month}.${day}.`;
+    if (formatStr === 'MM.dd.') return `${month}.${day}.`;
+    if (formatStr === 'HH:mm') return `${hours}:${minutes}`;
+    if (formatStr === 'yyyy.MM.') return `${year}.${month}.`;
     return `${year}.${month}.${day}. ${hours}:${minutes}`;
 }
 
-// Fő funkciók
-export { loadEloHistoryData, initEloHistoryMode };
-
-async function loadEloHistoryData() {
+export async function loadEloHistoryData() {
     refreshHistoryBtn.disabled = true;
     const data = await fetchData('/api/elo_history');
-    
     if (data) {
         renderEloHistoryChart(data);
     } else {
-        console.error("Hiba az ELO előzmények betöltése közben.");
-        if (eloHistoryChart) {
-            eloHistoryChart.destroy();
-        }
+        console.error('Hiba az ELO előzmények betöltése közben.');
+        if (eloHistoryChart) eloHistoryChart.destroy();
         const ctx = eloHistoryChartCanvas.getContext('2d');
         ctx.clearRect(0, 0, eloHistoryChartCanvas.width, eloHistoryChartCanvas.height);
         ctx.textAlign = 'center';
-        ctx.fillText('Hiba a grafikon adatainak betöltése közben.', 
-            eloHistoryChartCanvas.width / 2, eloHistoryChartCanvas.height / 2);
+        ctx.fillText('Hiba a grafikon adatainak betöltése közben.', eloHistoryChartCanvas.width/2, eloHistoryChartCanvas.height/2);
     }
     refreshHistoryBtn.disabled = false;
 }
 
 function renderEloHistoryChart(apiData) {
-    if (eloHistoryChart) {
-        eloHistoryChart.destroy();
+    if (eloHistoryChart) eloHistoryChart.destroy();
+
+    // 1. Collect all unique timestamps and sort them
+    const allTimestamps = new Set();
+    for (const model in apiData) {
+        apiData[model].forEach(point => allTimestamps.add(new Date(point.x).getTime()));
     }
-    
+    const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
+
+    // 2. Create labels for the category axis
+    const labels = sortedTimestamps.map(ts => formatDate(new Date(ts), 'yyyy.MM.dd. HH:mm'));
+    const timestampToIndex = new Map(sortedTimestamps.map((ts, index) => [ts, index]));
+
+    // 3. Transform datasets for the category axis
     const datasets = [];
-    const modelColors = {};
     let colorIndex = 0;
-
-    // Összegyűjtjük az összes időpontot és ELO változást
-    const allPoints = [];
     for (const model in apiData) {
-        apiData[model].forEach(point => {
-            allPoints.push({
-                date: new Date(point.x),
-                elo: point.y,
-                model: model
-            });
+        const modelData = apiData[model];
+        const categoryData = new Array(sortedTimestamps.length).fill(null);
+
+        modelData.forEach(point => {
+            const timestamp = new Date(point.x).getTime();
+            const index = timestampToIndex.get(timestamp);
+            if (index !== undefined) {
+                categoryData[index] = point.y;
+            }
         });
-    }
-    
-    // Időpontok szerint rendezzük
-    allPoints.sort((a, b) => a.date - b.date);
 
-    // Számoljuk ki az időkülönbségeket és az ELO változásokat
-    const changes = new Map();
-    const dayInMs = 24 * 60 * 60 * 1000;
-    
-    for (let i = 1; i < allPoints.length; i++) {
-        const currentDate = allPoints[i].date;
-        const prevDate = allPoints[i-1].date;
-        const dateKey = currentDate.toISOString().split('T')[0];
-        
-        if (!changes.has(dateKey)) {
-            changes.set(dateKey, {
-                count: 0,
-                eloDiffs: []
-            });
-        }
-        
-        const dayData = changes.get(dateKey);
-        dayData.count++;
-        dayData.eloDiffs.push(Math.abs(allPoints[i].elo - allPoints[i-1].elo));
-    }
-
-    // Készítsünk szűrt adatpontokat minden modellhez
-    for (const model in apiData) {
-        if (!modelColors[model]) {
-            modelColors[model] = colorPalette[colorIndex % colorPalette.length];
-            colorIndex++;
-        }
-        
-        const data = apiData[model];
-        if (data.length <= 3) {
-            datasets.push({
-                label: model,
-                data: data,
-                borderColor: modelColors[model],
-                backgroundColor: modelColors[model] + '33',
-                tension: 0.1,
-                fill: false
-            });
-            continue;
-        }
-
-        // Pontok szűrése az aktivitás alapján
-        const filteredData = [];
-        for (let i = 0; i < data.length; i++) {
-            const current = new Date(data[i].x);
-            const dateKey = current.toISOString().split('T')[0];
-            const dayData = changes.get(dateKey);
-            
-            // Első és utolsó pont mindig kell
-            if (i === 0 || i === data.length - 1) {
-                filteredData.push(data[i]);
-                continue;
-            }
-
-            const prev = new Date(data[i-1].x);
-            const next = new Date(data[i+1].x);
-            const timeToPrev = current - prev;
-            const timeToNext = next - current;
-            
-            // Ha ez egy aktív nap vagy jelentős változás történt, megtartjuk
-            if (dayData && (
-                dayData.count >= 3 || // Aktív nap
-                Math.max(...dayData.eloDiffs) > 0.5 || // Jelentős ELO változás
-                timeToPrev > dayInMs * 7 || // Hosszú inaktív időszak előtte
-                timeToNext > dayInMs * 7 // Hosszú inaktív időszak utána
-            )) {
-                filteredData.push(data[i]);
+        // Optional: Fill nulls with the previous non-null value to make lines continuous
+        // Remove this loop if you want gaps in lines when a model misses a timestamp
+        let lastValue = null;
+        for (let i = 0; i < categoryData.length; i++) {
+            if (categoryData[i] !== null) {
+                lastValue = categoryData[i];
+            } else if (lastValue !== null) {
+                 // Use previous value if current is null, remove if gaps are desired
+                // categoryData[i] = lastValue; // Uncomment to fill gaps
             }
         }
+
 
         datasets.push({
             label: model,
-            data: filteredData,
-            borderColor: modelColors[model],
-            backgroundColor: modelColors[model] + '33',
+            data: categoryData, // Use the transformed data
+            borderColor: colorPalette[colorIndex % colorPalette.length],
+            backgroundColor: colorPalette[colorIndex % colorPalette.length] + '33', // Optional: for area fill if needed
             tension: 0.1,
-            fill: false
+            fill: false,
+            spanGaps: true // Connect points across null values
         });
+        colorIndex++;
     }
 
+    // 4. Render chart with category scale
     const ctx = eloHistoryChartCanvas.getContext('2d');
     eloHistoryChart = new Chart(ctx, {
         type: 'line',
-        data: { datasets },
+        data: {
+            labels: labels, // Use generated labels
+            datasets: datasets
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: {
-                duration: 750
-            },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Modellek ELO Pontszámának Változása az Időben'
+                    text: 'Modellek ELO Pontszámának Változása (Sűrített Időskála)' // Updated title
                 },
                 legend: {
-                    position: 'top',
+                    position: 'top'
                 },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
                     callbacks: {
-                        label: function(context) {
-                            return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} ELO`;
-                        },
-                        title: function(context) {
-                            return formatDate(context[0].parsed.x, 'yyyy.MM.dd. HH:mm');
-                        }
+                        // Display ELO, use label (formatted date) for the title
+                        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(1) : 'N/A'} ELO`,
+                        title: ctx => ctx[0]?.label || '' // Tooltip title is the category label
                     }
                 }
-            },            scales: {
+            },
+            scales: {
                 x: {
-                    type: 'time',
-                    adapters: {
-                        date: {
-                            locale: 'hu'
-                        }
-                    },
-                    time: {
-                        unit: 'auto',
-                        minUnit: 'minute',
-                        displayFormats: {
-                            minute: 'HH:mm',
-                            hour: 'HH:mm',
-                            day: 'MM.dd.',
-                            week: 'yyyy.MM.dd.',
-                            month: 'yyyy.MM.'
-                        },
-                        tooltipFormat: 'yyyy.MM.dd. HH:mm'
-                    },
-                    ticks: {
-                        maxRotation: 45,
-                        source: 'auto',
-                        maxTicksLimit: 15,
-                        callback: function(value) {
-                            const date = new Date(value);
-                            // Ha éjfél, akkor teljes dátumot mutatunk
-                            if (date.getHours() === 0 && date.getMinutes() === 0) {
-                                return formatDate(date, 'yyyy.MM.dd.');
-                            }
-                            // Egyébként csak az időt
-                            return formatDate(date, 'HH:mm');
-                        }
+                    // Use 'category' scale instead of 'time'
+                    type: 'category',
+                    title: {
+                        display: true,
+                        text: 'Időpont (csak frissítésekkel)'
                     }
+                    // Removed time-specific formatting
                 },
                 y: {
                     title: {
                         display: true,
                         text: 'ELO Pontszám'
                     },
-                    beginAtZero: false,
-                    ticks: {
-                        callback: function(value) {
-                            return value.toFixed(0);
-                        }
-                    }
+                    beginAtZero: false
                 }
             },
             interaction: {
@@ -247,9 +146,6 @@ function renderEloHistoryChart(apiData) {
     });
 }
 
-// Event listeners
-function initEloHistoryMode() {
+export function initEloHistoryMode() {
     refreshHistoryBtn.addEventListener('click', loadEloHistoryData);
-    // Kezdeti betöltés
-    //loadEloHistoryData();
 }
