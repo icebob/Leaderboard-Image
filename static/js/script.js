@@ -325,34 +325,111 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderEloHistoryChart(apiData) {
         if (eloHistoryChart) {
-            eloHistoryChart.destroy(); // Destroy previous chart instance if exists
+            eloHistoryChart.destroy();
         }
         
         const datasets = [];
-        const modelColors = {}; // Store colors for consistency
+        const modelColors = {};
         const colorPalette = [
             '#0d6efd', '#6f42c1', '#d63384', '#fd7e14', '#ffc107', 
             '#198754', '#20c997', '#0dcaf0', '#6c757d', '#adb5bd'
         ];
         let colorIndex = 0;
 
+        // Összegyűjtjük az összes időpontot és ELO változást
+        const allPoints = [];
+        for (const model in apiData) {
+            apiData[model].forEach(point => {
+                allPoints.push({
+                    date: new Date(point.x),
+                    elo: point.y,
+                    model: model
+                });
+            });
+        }
+        
+        // Időpontok szerint rendezzük
+        allPoints.sort((a, b) => a.date - b.date);
+
+        // Számoljuk ki az időkülönbségeket és az ELO változásokat
+        const changes = new Map();
+        const dayInMs = 24 * 60 * 60 * 1000;
+        
+        for (let i = 1; i < allPoints.length; i++) {
+            const currentDate = allPoints[i].date;
+            const prevDate = allPoints[i-1].date;
+            const timeDiff = currentDate - prevDate;
+            const dateKey = currentDate.toISOString().split('T')[0];
+            
+            if (!changes.has(dateKey)) {
+                changes.set(dateKey, {
+                    count: 0,
+                    eloDiffs: []
+                });
+            }
+            
+            const dayData = changes.get(dateKey);
+            dayData.count++;
+            dayData.eloDiffs.push(Math.abs(allPoints[i].elo - allPoints[i-1].elo));
+        }
+
+        // Készítsünk szűrt adatpontokat minden modellhez
         for (const model in apiData) {
             if (!modelColors[model]) {
                 modelColors[model] = colorPalette[colorIndex % colorPalette.length];
                 colorIndex++;
             }
             
+            const data = apiData[model];
+            if (data.length <= 3) {
+                datasets.push({
+                    label: model,
+                    data: data,
+                    borderColor: modelColors[model],
+                    backgroundColor: modelColors[model] + '33',
+                    tension: 0.1,
+                    fill: false
+                });
+                continue;
+            }
+
+            // Pontok szűrése az aktivitás alapján
+            const filteredData = [];
+            for (let i = 0; i < data.length; i++) {
+                const current = new Date(data[i].x);
+                const dateKey = current.toISOString().split('T')[0];
+                const dayData = changes.get(dateKey);
+                
+                // Első és utolsó pont mindig kell
+                if (i === 0 || i === data.length - 1) {
+                    filteredData.push(data[i]);
+                    continue;
+                }
+
+                const prev = new Date(data[i-1].x);
+                const next = new Date(data[i+1].x);
+                const timeToPrev = current - prev;
+                const timeToNext = next - current;
+                
+                // Ha ez egy aktív nap (sok változás), vagy jelentős ELO változás történt,
+                // vagy ez az egyetlen pont egy hosszabb inaktív időszakban, akkor megtartjuk
+                if (dayData && (
+                    dayData.count >= 3 || // Aktív nap
+                    Math.max(...dayData.eloDiffs) > 0.5 || // Jelentős ELO változás
+                    timeToPrev > dayInMs * 7 || // Hosszú inaktív időszak előtte
+                    timeToNext > dayInMs * 7 // Hosszú inaktív időszak utána
+                )) {
+                    filteredData.push(data[i]);
+                }
+            }
+
             datasets.push({
                 label: model,
-                data: apiData[model],
+                data: filteredData,
                 borderColor: modelColors[model],
-                backgroundColor: modelColors[model] + '33', // Semi-transparent fill
-                tension: 0.1, // Smooth lines slightly
-                fill: false, // Don't fill area under the line by default
-                parsing: {
-                    xAxisKey: 'x', // Tell Chart.js which property is for the x-axis
-                    yAxisKey: 'y'  // Tell Chart.js which property is for the y-axis
-                }
+                backgroundColor: modelColors[model] + '33',
+                tension: 0.1,
+                fill: false
             });
         }
 
@@ -363,6 +440,9 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 750
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -374,21 +454,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     tooltip: {
                         mode: 'index',
                         intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} ELO`;
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
                         type: 'time',
                         time: {
-                            unit: 'day', // Adjust based on data density (e.g., 'hour', 'week')
-                            tooltipFormat: 'yyyy. MM. dd. HH:mm', // Format for tooltips
+                            unit: 'day',
+                            parser: 'yyyy-MM-dd HH:mm:ss',
                             displayFormats: {
-                                day: 'yyyy. MM. dd.' // Format for axis labels
+                                millisecond: 'HH:mm:ss.SSS',
+                                second: 'HH:mm:ss',
+                                minute: 'HH:mm',
+                                hour: 'HH:mm',
+                                day: 'yyyy.MM.dd.',
+                                week: 'yyyy.MM.dd.',
+                                month: 'yyyy.MM.',
+                                quarter: 'yyyy.MM.',
+                                year: 'yyyy.'
                             }
                         },
-                        title: {
-                            display: true,
-                            text: 'Dátum'
+                        ticks: {
+                            source: 'auto',
+                            maxRotation: 45,
+                            autoSkip: true,
+                            maxTicksLimit: 20
                         }
                     },
                     y: {
@@ -396,7 +491,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             display: true,
                             text: 'ELO Pontszám'
                         },
-                        beginAtZero: false // ELO can be high, no need to start at 0
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(0);
+                            }
+                        }
                     }
                 },
                 interaction: {

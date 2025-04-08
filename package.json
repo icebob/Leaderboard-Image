@@ -1,0 +1,27 @@
+{
+  "name": "leaderboard-image",
+  "version": "1.0.0",
+  "description": "![AI képgenerátorok összehasonlítása](docs/images/arena-battle.png)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mp3pintyo/Leaderboard-Image.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mp3pintyo/Leaderboard-Image/issues"
+  },
+  "homepage": "https://github.com/mp3pintyo/Leaderboard-Image#readme",
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  }
+}

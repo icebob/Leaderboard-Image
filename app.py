@@ -11,6 +11,12 @@ from config import DATA_DIR, ALLOWED_EXTENSIONS, DEFAULT_ELO, MODELS, REVEAL_DEL
 app = Flask(__name__)
 app.config['DATA_DIR'] = DATA_DIR # Flask konfigurációban is tároljuk
 
+# Statikus fájlok kiszolgálása a node_modules mappából
+@app.route('/node_modules/<path:filename>')
+def serve_node_modules(filename):
+    node_modules_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'node_modules')
+    return send_from_directory(node_modules_dir, filename)
+
 # Adatbázis inicializálása indításkor (ha szükséges)
 with app.app_context():
     init_db()
