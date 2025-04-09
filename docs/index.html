@@ -190,8 +190,7 @@
                     <div class="col-md-6">
                         <p>
                             A Leaderboard a modellek ranglistáját mutatja ELO pontszám szerint csökkenő sorrendben. A táblázat tartalmazza az ELO értékeket, a győzelmek számát, az összes mérkőzés számát és a győzelmi arányt.
-                        </p>
-                        <p>
+                        </p>                        <p>
                             <strong>ELO rendszer:</strong> A rangsorolás a sakk-világból ismert ELO pontrendszeren alapul, amely figyelembe veszi az ellenfelek erősségét.
                         </p>
                         <ul>
@@ -199,6 +198,16 @@
                             <li>A szavazások hatására a pontok dinamikusan változnak</li>
                             <li>Az erősebb ellenfél legyőzéséért több pont jár</li>
                         </ul>
+                        
+                        <div class="alert alert-primary mt-3" role="alert">
+                            <i class="bi bi-filter-circle-fill"></i> <strong>Új funkció: Modell típus szerinti szűrés</strong>
+                            <p class="mb-0">A Leaderboard nézeten most már lehetőség van a modellek szűrésére azok típusa szerint:</p>
+                            <ul class="mb-0">
+                                <li><strong>Összes modell:</strong> Az összes modell megjelenítése</li>
+                                <li><strong>Open Source modellek:</strong> Csak a letölthető, nyílt forráskódú modellek</li>
+                                <li><strong>Zárt forrású modellek:</strong> Csak a nem letölthető, zárt forráskódú modellek</li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <img src="images/leaderboard.png" alt="Leaderboard mód képernyőképe" class="img-fluid rounded shadow-sm">
@@ -386,20 +395,22 @@ flask run --host=0.0.0.0
             <p>
                 A rendszer konfigurációs beállításai a <code>config.py</code> fájlban találhatók. Itt módosíthatók a következő beállítások:
             </p>
-            
-            <div class="code-block">                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
-# Fontos: Ezek csak a fájlok alapnevei, a kiterjesztés dinamikusan lesz meghatározva
+              <div class="code-block">                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó adatok
+# Minden modell egy szótár, ami tartalmazza:
+# - 'filename': A fájlnév alaprésze kiterjesztés nélkül
+# - 'open_source': Boolean érték, True ha letölthető/open source modell, False ha zárt/nem letölthető
 MODELS = {
-    'Grok': 'grok',
-    'Google Gemini Flash': 'gemini-flash',
-    'Google Imagen 3': 'imagen3', 
-    'ChatGPT GPT 4o': 'gpt4o',
-    'Midjourney v6.1': 'midjourneyv61',
-    'Midjourney v7': 'midjourneyv7',
-    'Reve': 'reve',
-    'HiDreamI1': 'hidreami1'
-    #'Ideogram 3': 'ideogram3',
-    #'Flux 11 Ultra': 'flux11ultra'
+    'Grok': {'filename': 'grok', 'open_source': False},
+    'Google Gemini Flash': {'filename': 'gemini-flash', 'open_source': False},
+    'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
+    'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
+    'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
+    'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
+    'Reve': {'filename': 'reve', 'open_source': False},
+    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True},
+    'Lumina-Image-2.0': {'filename': 'lumina2', 'open_source': True},
+    #'Ideogram 3': {'filename': 'ideogram3', 'open_source': False},
+    #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
 }</code></pre>
             </div>
 

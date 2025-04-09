@@ -18,6 +18,7 @@ A Képgenerátor Aréna egy web-alapú alkalmazás, amely lehetővé teszi kül�
 - ⚙️ **Konfigurálhatóság:** Modellek, fájlformátumok és alapbeállítások külön konfigurációs fájlban
 - 👁️‍🗨️ **Vak szavazás:** Arena Battle módban a modellek nevei csak a szavazás után jelennek meg
 - 📊 **Részletes statisztikák:** ELO pontszámok, győzelmek, mérkőzések száma és győzelmi arányok
+- 🔍 **Modell típus szűrés:** Leaderboard nézeten szűrhetők a modellek open source/zárt forrás szerint
 
 ## 🛠️ Telepítés
 
