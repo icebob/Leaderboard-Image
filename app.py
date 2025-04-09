@@ -156,17 +156,15 @@ def get_battle_data():
     except FileNotFoundError:
         return jsonify({"error": f"Prompt file not found for ID: {prompt_id}"}), 500
     except Exception as e:
-         return jsonify({"error": f"Error reading prompt file: {e}"}), 500
-
-    # Válassz két KÜLÖNBÖZŐ modellt véletlenszerűen
+         return jsonify({"error": f"Error reading prompt file: {e}"}), 500    # Válassz két KÜLÖNBÖZŐ modellt véletlenszerűen
     model_keys = list(MODELS.keys())
     if len(model_keys) < 2:
         return jsonify({"error": "Not enough models defined for battle"}), 500
     model1_key, model2_key = random.sample(model_keys, 2)
 
     # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
-    model1_file = find_model_file(prompt_id, MODELS[model1_key])
-    model2_file = find_model_file(prompt_id, MODELS[model2_key])
+    model1_file = find_model_file(prompt_id, MODELS[model1_key]['filename'])
+    model2_file = find_model_file(prompt_id, MODELS[model2_key]['filename'])
     
     # Ha valamelyik fájl nem található, hibaüzenetet adunk vissza
     if not model1_file:
@@ -214,11 +212,9 @@ def get_side_by_side_data():
     except FileNotFoundError:
         return jsonify({"error": f"Prompt file not found for ID: {prompt_id}"}), 500
     except Exception as e:
-         return jsonify({"error": f"Error reading prompt file: {e}"}), 500
-
-    # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
-    model1_file = find_model_file(prompt_id, MODELS[model1_key])
-    model2_file = find_model_file(prompt_id, MODELS[model2_key])
+         return jsonify({"error": f"Error reading prompt file: {e}"}), 500    # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
+    model1_file = find_model_file(prompt_id, MODELS[model1_key]['filename'])
+    model2_file = find_model_file(prompt_id, MODELS[model2_key]['filename'])
     
     # Ha valamelyik fájl nem található, hibaüzenetet adunk vissza
     if not model1_file:
@@ -285,6 +281,9 @@ def record_vote():
 def get_leaderboard():
     """Leaderboard adatok lekérdezése és kiszámítása."""    
     try:
+        # Opcionális szűrési paraméter: model_type lehet 'all', 'open-source' vagy 'closed-source'
+        model_type = request.args.get('model_type', 'all')
+        
         db = get_db()
         # Összes győzelem számolása modellenként
         wins_cursor = db.execute('''SELECT winner, COUNT(*) as win_count FROM votes GROUP BY winner''')
@@ -306,6 +305,12 @@ def get_leaderboard():
         leaderboard = []
         all_model_keys = list(MODELS.keys())
         for model in all_model_keys:
+            # Szűrés model_type alapján
+            is_open_source = MODELS[model]['open_source']
+            if (model_type == 'open-source' and not is_open_source) or \
+               (model_type == 'closed-source' and is_open_source):
+                continue
+                
             model_wins = wins.get(model, 0)
             model_matches = total_matches.get(model, 0)
             win_rate = (model_wins / model_matches * 100) if model_matches > 0 else 0
@@ -316,7 +321,8 @@ def get_leaderboard():
                 "wins": model_wins,
                 "matches": model_matches,
                 "win_rate": round(win_rate, 2),
-                "elo": round(elo, 1)  # Egy tizedesjegyre kerekítjük az ELO értéket
+                "elo": round(elo, 1),  # Egy tizedesjegyre kerekítjük az ELO értéket
+                "open_source": is_open_source  # Hozzáadjuk az open_source tulajdonságot
             })
 
         # Rendezés ELO pontszám szerint csökkenő sorrendben

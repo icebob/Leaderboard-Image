@@ -3,20 +3,29 @@ import { fetchData } from './api.js';
 // DOM elemek
 const leaderboardTableBody = document.getElementById('leaderboard-table-body');
 const refreshLeaderboardBtn = document.getElementById('refresh-leaderboard-btn');
+const modelTypeRadios = document.querySelectorAll('input[name="model-type"]');
+
+// Változók
+let currentModelType = 'all'; // Alapértelmezett szűrő: összes modell
 
 // Fő funkciók
 export async function loadLeaderboardData() {
-    leaderboardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Leaderboard betöltése...</td></tr>';
+    leaderboardTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Leaderboard betöltése...</td></tr>';
     refreshLeaderboardBtn.disabled = true;
 
-    const data = await fetchData('/api/leaderboard');
+    const data = await fetchData(`/api/leaderboard?model_type=${currentModelType}`);
     if (data) {
         leaderboardTableBody.innerHTML = '';
         if (data.length === 0) {
-            leaderboardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Még nincsenek szavazatok.</td></tr>';
+            leaderboardTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Nincs adat a kiválasztott szűrésre</td></tr>';
         } else {
             data.forEach((row, index) => {
                 const tr = document.createElement('tr');
+                // Modell típus kijelzése: open source vagy zárt
+                const modelType = row.open_source ? 
+                    '<span class="badge bg-success">Open Source</span>' : 
+                    '<span class="badge bg-warning text-dark">Zárt forrású</span>';
+                
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${row.model}</td>
@@ -24,17 +33,29 @@ export async function loadLeaderboardData() {
                     <td>${row.wins}</td>
                     <td>${row.matches}</td>
                     <td>${row.win_rate}%</td>
+                    <td>${modelType}</td>
                 `;
                 leaderboardTableBody.appendChild(tr);
             });
         }
     } else {
-        leaderboardTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Hiba a leaderboard betöltése közben.</td></tr>';
+        leaderboardTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Hiba a leaderboard betöltése közben.</td></tr>';
     }
     refreshLeaderboardBtn.disabled = false;
 }
 
 // Event listeners
 export function initLeaderboardMode() {
+    // Frissítés gomb eseménykezelő
     refreshLeaderboardBtn.addEventListener('click', loadLeaderboardData);
+    
+    // Modell típus szűrők eseménykezelői
+    modelTypeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            // Frissítsük a jelenlegi szűrési típust
+            currentModelType = e.target.value;
+            // Töltsük be az adatokat az új szűrővel
+            loadLeaderboardData();
+        });
+    });
 }

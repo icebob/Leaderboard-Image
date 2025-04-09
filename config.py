@@ -6,20 +6,22 @@ DATABASE = 'votes.db'
 # Az adatmappák elérési útja
 DATA_DIR = 'data'
 
-# Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
-# Fontos: Ezek csak a fájlok alapnevei, a kiterjesztés dinamikusan lesz meghatározva
+# Modell nevek és a hozzájuk tartozó adatok
+# Minden modell egy szótár, ami tartalmazza:
+# - 'filename': A fájlnév alaprésze kiterjesztés nélkül
+# - 'open_source': Boolean érték, True ha letölthető/open source modell, False ha zárt/nem letölthető
 MODELS = {
-    'Grok': 'grok',
-    'Google Gemini Flash': 'gemini-flash',
-    'Google Imagen 3': 'imagen3',
-    'ChatGPT GPT 4o': 'gpt4o',
-    'Midjourney v6.1': 'midjourneyv61',
-    'Midjourney v7': 'midjourneyv7',
-    'Reve': 'reve',
-    'HiDream-I1':'hidreami1',
-    'Lumina-Image-2.0': 'lumina2',
-    #'Ideogram 3': 'ideogram3',
-    #'Flux 11 Ultra': 'flux11ultra'
+    'Grok': {'filename': 'grok', 'open_source': False},
+    'Google Gemini Flash': {'filename': 'gemini-flash', 'open_source': False},
+    'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
+    'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
+    'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
+    'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
+    'Reve': {'filename': 'reve', 'open_source': False},
+    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True},
+    'Lumina-Image-2.0': {'filename': 'lumina2', 'open_source': True},
+    #'Ideogram 3': {'filename': 'ideogram3', 'open_source': False},
+    #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
 }
 
 # Engedélyezett képkiterjesztések listája

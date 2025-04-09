@@ -104,11 +104,25 @@
                     <img id="sbs-image2" src="" alt="Modell 2 képe" class="img-fluid rounded arena-image">
                 </div>
             </div>
-        </div>
-
-        <!-- Leaderboard Mode -->
+        </div>        <!-- Leaderboard Mode -->
         <div id="leaderboard-mode" class="arena-mode" style="display: none;">
             <h2 class="text-center mb-4">Leaderboard</h2>
+            
+            <div class="row mb-3 justify-content-center">
+                <div class="col-md-6">
+                    <div class="btn-group w-100" role="group" aria-label="Modell típus szűrő">
+                        <input type="radio" class="btn-check" name="model-type" id="all-models" value="all" checked>
+                        <label class="btn btn-outline-primary" for="all-models">Összes modell</label>
+                        
+                        <input type="radio" class="btn-check" name="model-type" id="open-source" value="open-source">
+                        <label class="btn btn-outline-success" for="open-source">Open Source modellek</label>
+                        
+                        <input type="radio" class="btn-check" name="model-type" id="closed-source" value="closed-source">
+                        <label class="btn btn-outline-warning" for="closed-source">Zárt forrású modellek</label>
+                    </div>
+                </div>
+            </div>
+            
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
@@ -118,6 +132,7 @@
                         <th>Győzelmek</th>
                         <th>Meccsek száma</th>
                         <th>Győzelmi arány</th>
+                        <th>Típus</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-table-body">
