@@ -103,16 +103,20 @@ A rendszer képes rugalmasan kezelni a képfájlok kiterjesztéseit. Ez azt jele
 
 Példa konfiguráció:
 ```python
-# Modell nevek és a hozzájuk tartozó fájl alapnevek (kiterjesztés nélkül)
+# Modell nevek és a hozzájuk tartozó adatok
+# Minden modell egy szótár, ami tartalmazza:
+# - 'filename': A fájlnév alaprésze kiterjesztés nélkül
+# - 'open_source': Boolean érték, True ha letölthető/open source modell, False ha zárt/nem letölthető
 MODELS = {
-    'Grok': 'grok',
-    'Google Gemini Flash': 'gemini-flash',
-    'Google Imagen 3': 'imagen3', 
-    'ChatGPT GPT 4o': 'gpt4o',
-    'Midjourney v6.1': 'midjourneyv61',
-    'Midjourney v7': 'midjourneyv7',
-    'Reve': 'reve',
-    'HiDreamI1': 'hidreami1'
+    'Grok': {'filename': 'grok', 'open_source': False},
+    'Google Gemini Flash': {'filename': 'gemini-flash', 'open_source': False},
+    'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
+    'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
+    'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
+    'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
+    'Reve': {'filename': 'reve', 'open_source': False},
+    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True},
+    'Lumina-Image-2.0': {'filename': 'lumina2', 'open_source': True}
 }
 ```
 
@@ -125,7 +129,8 @@ MODELS = {
 - Midjourney v6.1
 - Midjourney v7
 - Reve
-- HiDreamI1
+- HiDream-I1
+- Lumina-Image-2.0
 
 ## 🗄️ Adatbázis struktúra
 
