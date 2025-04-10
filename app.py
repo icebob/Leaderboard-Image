@@ -192,6 +192,8 @@ def get_side_by_side_data():
     """Adatokat ad vissza az Arena Side-by-Side módhoz."""
     model1_key = request.args.get('model1')
     model2_key = request.args.get('model2')
+    # Ellenőrizzük, hogy volt-e előző prompt_id
+    previous_prompt_id = request.args.get('previous_prompt_id', None)
 
     if not model1_key or not model2_key:
         return jsonify({"error": "Both model1 and model2 parameters are required"}), 400
@@ -202,8 +204,18 @@ def get_side_by_side_data():
     if not AVAILABLE_PROMPTS:
         return jsonify({"error": "No prompts available"}), 500
 
-    # Itt is választhatunk véletlenszerű promptot
-    prompt_id = random.choice(AVAILABLE_PROMPTS)
+    # Ha csak egy prompt van, nincs választási lehetőségünk
+    if len(AVAILABLE_PROMPTS) == 1:
+        prompt_id = AVAILABLE_PROMPTS[0]
+    else:
+        # Kizárjuk az előző prompt-ot a választási lehetőségekből
+        available_prompts = [p for p in AVAILABLE_PROMPTS if p != previous_prompt_id]
+        # Ha valamilyen okból az összes prompt ki lenne zárva, visszaállunk az eredeti listára
+        if not available_prompts:
+            available_prompts = AVAILABLE_PROMPTS
+        # Véletlenszerűen választunk, de biztosan nem az előző prompt-ot
+        prompt_id = random.choice(available_prompts)
+    
     prompt_path = os.path.join(app.config['DATA_DIR'], prompt_id, 'prompt.txt')
 
     try:
