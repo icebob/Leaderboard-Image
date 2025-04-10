@@ -14,6 +14,7 @@ const sbsImage2 = document.getElementById('sbs-image2');
 // Állapot
 let currentSbsModel1 = '';
 let currentSbsModel2 = '';
+let currentPromptId = null; // Az aktuális prompt azonosítója
 
 // Fő funkciók
 function updateSbsSelection() {
@@ -38,8 +39,17 @@ async function loadSideBySideData() {
     sbsModel2Name.textContent = currentSbsModel2;
     sbsLoadBtn.disabled = true;
 
-    const data = await fetchData(`/api/side_by_side_data?model1=${currentSbsModel1}&model2=${currentSbsModel2}`);
+    // Elküldjük az előző prompt ID-t is, hogy ne kapjuk újra ugyanazt
+    let apiUrl = `/api/side_by_side_data?model1=${currentSbsModel1}&model2=${currentSbsModel2}`;
+    if (currentPromptId) {
+        apiUrl += `&previous_prompt_id=${currentPromptId}`;
+    }
+    
+    const data = await fetchData(apiUrl);
     if (data) {
+        // Aktualizáljuk a jelenlegi prompt ID-t
+        currentPromptId = data.prompt_id;
+        
         sbsPrompt.textContent = `Prompt: "${data.prompt_text}" (ID: ${data.prompt_id})`;
         sbsImage1.src = data.model1.image_url;
         sbsImage2.src = data.model2.image_url;
