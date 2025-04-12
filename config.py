@@ -20,6 +20,7 @@ MODELS = {
     'Reve': {'filename': 'reve', 'open_source': False},
     'HiDream-I1': {'filename': 'hidreami1', 'open_source': True},
     'Lumina-Image-2.0': {'filename': 'lumina2', 'open_source': True},
+    'Capcut Dreamina Image 2.0 Pro': {'filename': 'dreamina-image20pro', 'open_source': False},
     #'Ideogram 3': {'filename': 'ideogram3', 'open_source': False},
     #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
 }
