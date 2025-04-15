@@ -115,8 +115,7 @@ MODELS = {
     'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
     'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
     'Reve': {'filename': 'reve', 'open_source': False},
-    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True},
-    'Lumina-Image-2.0': {'filename': 'lumina2', 'open_source': True}
+    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True}
 }
 ```
 
@@ -131,6 +130,9 @@ MODELS = {
 - Reve
 - HiDream-I1
 - Lumina-Image-2.0
+- Capcut Dreamina Image 2.0 Pro
+- Juggernaut XI
+- Fluxmania V
 
 ## 🗄️ Adatbázis struktúra
 
