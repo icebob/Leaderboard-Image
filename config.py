@@ -23,6 +23,8 @@ MODELS = {
     'Capcut Dreamina Image 2.0 Pro': {'filename': 'dreamina-image20pro', 'open_source': False},
     'Juggernaut XI': {'filename': 'juggernautxl', 'open_source': True},
     'Fluxmania V': {'filename': 'fluxmaniaV', 'open_source': True},
+    'Tengr.ai': {'filename': 'tengrai', 'open_source': False},
+    'Tengr.ai Quantum': {'filename': 'tengrai-q', 'open_source': False},
     #'Ideogram 3': {'filename': 'ideogram3', 'open_source': False},
     #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
 }
