@@ -26,6 +26,7 @@ MODELS = {
     'Tengr.ai': {'filename': 'tengrai', 'open_source': False},
     'Tengr.ai Quantum': {'filename': 'tengrai-q', 'open_source': False},
     'Adobe Firefly Image 4': {'filename': 'firefly4', 'open_source': False},
+    'Dreamina Seedream 3.0': {'filename': 'dreamina-image3', 'open_source': False},
     #'Ideogram 3': {'filename': 'ideogram3', 'open_source': False},
     #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
 }
