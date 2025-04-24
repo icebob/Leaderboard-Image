@@ -75,6 +75,7 @@ Főbb jellemzők:
 - Interaktív információs dobozok a pontos értékek megjelenítésére
 - Időalapú x-tengely a fejlődés kronológiai nyomon követéséhez
 - Frissítési lehetőség a legfrissebb adatok betöltéséhez
+- Új interaktív funkció: ha az egeret lenyomva tartjuk a legendában egy modell nevére vagy jelölőjére, a többi modell grafikonja és jelölői 10%-os átlátszóságúvá halványulnak, felengedéskor visszaáll az eredeti állapot
 
 ![ELO Fejlődés](docs/images/elo-history.png)
 
