@@ -36,6 +36,15 @@ export async function loadEloHistoryData() {
     refreshHistoryBtn.disabled = false;
 }
 
+function hexToRgba(hex, alpha) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
 function renderEloHistoryChart(apiData) {
     if (eloHistoryChart) eloHistoryChart.destroy();
 
@@ -143,6 +152,40 @@ function renderEloHistoryChart(apiData) {
                 intersect: false
             }
         }
+    });
+
+    // store original colors for restore
+    eloHistoryChart._originalBorderColors = eloHistoryChart.data.datasets.map(ds => ds.borderColor);
+    eloHistoryChart._originalBackgroundColors = eloHistoryChart.data.datasets.map(ds => ds.backgroundColor);
+
+    // fade other datasets on legend mousedown
+    eloHistoryChartCanvas.addEventListener('mousedown', event => {
+        const rect = eloHistoryChartCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        eloHistoryChart.legend.legendHitBoxes.forEach((box, idx) => {
+            if (x >= box.left && x <= box.left + box.width && y >= box.top && y <= box.top + box.height) {
+                eloHistoryChart.data.datasets.forEach((ds, j) => {
+                    if (j !== idx) {
+                        ds.borderColor = hexToRgba(eloHistoryChart._originalBorderColors[j], 0.1);
+                        ds.backgroundColor = hexToRgba(eloHistoryChart._originalBorderColors[j], 0.1);
+                    } else {
+                        ds.borderColor = eloHistoryChart._originalBorderColors[j];
+                        ds.backgroundColor = eloHistoryChart._originalBackgroundColors[j];
+                    }
+                });
+                eloHistoryChart.update();
+            }
+        });
+    });
+
+    // restore full opacity on mouseup
+    eloHistoryChartCanvas.addEventListener('mouseup', () => {
+        eloHistoryChart.data.datasets.forEach((ds, i) => {
+            ds.borderColor = eloHistoryChart._originalBorderColors[i];
+            ds.backgroundColor = eloHistoryChart._originalBackgroundColors[i];
+        });
+        eloHistoryChart.update();
     });
 }
 
