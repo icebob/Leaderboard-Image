@@ -133,6 +133,10 @@ MODELS = {
 - Capcut Dreamina Image 2.0 Pro
 - Juggernaut XI
 - Fluxmania V
+- Tengr.ai
+- Tengr.ai Quantum
+- Adobe Firefly Image 4
+- Dreamina Seedream 3.0
 
 ## 🗄️ Adatbázis struktúra
 
