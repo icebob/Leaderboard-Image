@@ -248,6 +248,40 @@ def get_side_by_side_data():
     }
     return jsonify(data)
 
+# Új API végpont a kép URL lekéréséhez modellváltáskor
+@app.route('/api/get_image')
+def get_image_for_model():
+    """Visszaadja egy adott modell képének URL-jét egy adott prompt ID-hoz."""
+    model_key = request.args.get('model')
+    prompt_id = request.args.get('prompt_id')
+
+    if not model_key or not prompt_id:
+        return jsonify({"error": "Both model and prompt_id parameters are required"}), 400
+
+    if model_key not in MODELS:
+        return jsonify({"error": f"Invalid model key provided: {model_key}"}), 400
+
+    if prompt_id not in AVAILABLE_PROMPTS:
+         # Lehet, hogy a prompt lista még nem frissült, próbáljuk meg újra
+        update_available_prompts()
+        if prompt_id not in AVAILABLE_PROMPTS:
+            return jsonify({"error": f"Invalid or unavailable prompt_id: {prompt_id}"}), 400
+
+    # Megkeressük a megfelelő képfájlt
+    model_filename_base = MODELS[model_key].get('filename')
+    if not model_filename_base:
+         return jsonify({"error": f"Filename configuration missing for model: {model_key}"}), 500
+
+    image_file = find_model_file(prompt_id, model_filename_base)
+
+    if not image_file:
+        # Logolhatnánk itt, hogy miért nem található a fájl
+        print(f"Image file not found for model '{model_key}' (base: '{model_filename_base}') in prompt '{prompt_id}'")
+        return jsonify({"error": f"Image for model {model_key} not found in prompt {prompt_id}"}), 404 # 404 jobb itt
+
+    image_url = f"/images/{prompt_id}/{image_file}"
+    return jsonify({"image_url": image_url})
+
 
 @app.route('/api/vote', methods=['POST'])
 def record_vote():
