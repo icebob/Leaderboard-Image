@@ -138,6 +138,7 @@ MODELS = {
 - Tengr.ai Quantum
 - Adobe Firefly Image 4
 - Dreamina Seedream 3.0
+- Ideogram 3.0
 
 ## 🗄️ Adatbázis struktúra
 
