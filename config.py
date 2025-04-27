@@ -28,6 +28,7 @@ MODELS = {
     'Adobe Firefly Image 4': {'filename': 'firefly4', 'open_source': False},
     'Dreamina Seedream 3.0': {'filename': 'dreamina-image3', 'open_source': False},
     'Ideogram 3.0': {'filename': 'ideogram3', 'open_source': False},
+    'Piclumen Realistic V2': {'filename': 'piclumen-realistic-v2', 'open_source': False},
     #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
 }
 

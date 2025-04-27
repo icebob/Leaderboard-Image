@@ -139,6 +139,7 @@ MODELS = {
 - Adobe Firefly Image 4
 - Dreamina Seedream 3.0
 - Ideogram 3.0
+- Piclumen Realistic V2
 
 ## 🗄️ Adatbázis struktúra
 
