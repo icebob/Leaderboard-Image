@@ -88,9 +88,9 @@
                          {% endif %}
                          {% endfor %}
                     </select>
-                </div>
-                <div class="col-md-2 align-self-end">
+                </div>                <div class="col-md-2 align-self-end d-flex flex-column gap-2">
                     <button id="sbs-load-btn" class="btn btn-primary w-100">Betöltés / Új Prompt</button>
+                    <button id="sbs-next-btn" class="btn btn-warning w-100">Következő prompt</button>
                 </div>
             </div>
             <p class="text-center mb-4 fst-italic" id="sbs-prompt">Válassz modelleket és kattints a Betöltés gombra...</p>
@@ -147,6 +147,16 @@
         <!-- ELO History Mode -->
         <div id="elo-history-mode" class="arena-mode" style="display: none;">
             <h2 class="text-center mb-4">Modellek ELO Fejlődése</h2>
+            <div class="text-center mt-3">
+                <div class="btn-group" role="group" aria-label="Időintervallum szűrő">
+                    <input type="radio" class="btn-check" name="elo-history-range" id="elo-range-1w" value="1w" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="elo-range-1w">1 hét</label>
+                    <input type="radio" class="btn-check" name="elo-history-range" id="elo-range-2w" value="2w" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="elo-range-2w">2 hét</label>
+                    <input type="radio" class="btn-check" name="elo-history-range" id="elo-range-all" value="all" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="elo-range-all">Teljes időtartam</label>
+                </div>
+            </div>
             <div class="chart-container" style="position: relative; height:60vh; width:80vw; margin: auto;">
                 <canvas id="eloHistoryChart"></canvas>
             </div>

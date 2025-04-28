@@ -415,6 +415,27 @@ def get_elo_history():
         print(f"Error fetching ELO history: {e}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+@app.route('/api/prompt_ids')
+def get_prompt_ids_api():
+    """Visszaadja az összes prompt ID-t (sorrendben)."""
+    if not AVAILABLE_PROMPTS:
+        update_available_prompts()
+    return jsonify({"prompt_ids": AVAILABLE_PROMPTS})
+
+@app.route('/api/prompt_text')
+def get_prompt_text_api():
+    """Visszaadja a prompt szövegét egy adott prompt_id-hoz."""
+    prompt_id = request.args.get('prompt_id')
+    if not prompt_id or prompt_id not in AVAILABLE_PROMPTS:
+        return jsonify({"error": "Invalid or missing prompt_id"}), 400
+    prompt_path = os.path.join(app.config['DATA_DIR'], prompt_id, 'prompt.txt')
+    try:
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            prompt_text = f.read().strip()
+        return jsonify({"prompt_text": prompt_text})
+    except Exception as e:
+        return jsonify({"error": f"Error reading prompt: {e}"}), 500
+
 
 if __name__ == '__main__':
     # Parancssori argumentumok kezelése

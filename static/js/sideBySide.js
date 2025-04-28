@@ -110,6 +110,67 @@ async function loadSideBySideData() {
     sbsLoadBtn.disabled = false;
 }
 
+// Következő prompt betöltése (nem random, hanem ID szerint)
+async function loadNextPromptData() {
+    // Lekérjük az összes prompt ID-t a szervertől
+    const promptListData = await fetchData('/api/prompt_ids');
+    if (!promptListData || !Array.isArray(promptListData.prompt_ids)) {
+        alert('Nem sikerült lekérni a prompt listát!');
+        return;
+    }
+    const promptIds = promptListData.prompt_ids;
+    if (!promptIds.length) {
+        alert('Nincs elérhető prompt!');
+        return;
+    }
+    // Ha nincs még prompt, az elsőt töltjük be
+    let nextPromptId;
+    if (!currentPromptId) {
+        nextPromptId = promptIds[0];
+    } else {
+        const idx = promptIds.indexOf(currentPromptId);
+        if (idx === -1 || idx === promptIds.length - 1) {
+            nextPromptId = promptIds[0]; // Körbe érünk
+        } else {
+            nextPromptId = promptIds[idx + 1];
+        }
+    }
+    // Modellek lekérése
+    const selectedModel1 = sbsModel1Select.value;
+    const selectedModel2 = sbsModel2Select.value;
+    if (!selectedModel1 || !selectedModel2) {
+        alert('Kérlek válassz ki mindkét modellt!');
+        return;
+    }
+    if (selectedModel1 === selectedModel2) {
+        alert('Kérlek válassz két különböző modellt!');
+        return;
+    }
+    // Prompt szöveg lekérése
+    const promptData = await fetchData(`/api/prompt_text?prompt_id=${nextPromptId}`);
+    if (!promptData || !promptData.prompt_text) {
+        alert('Nem sikerült lekérni a prompt szövegét!');
+        return;
+    }
+    // Képek lekérése a két modellhez
+    const [img1, img2] = await Promise.all([
+        fetchData(`/api/get_image?model=${encodeURIComponent(selectedModel1)}&prompt_id=${nextPromptId}`),
+        fetchData(`/api/get_image?model=${encodeURIComponent(selectedModel2)}&prompt_id=${nextPromptId}`)
+    ]);
+    // Állapot frissítése
+    currentPromptId = nextPromptId;
+    currentSbsModel1 = selectedModel1;
+    currentSbsModel2 = selectedModel2;
+    // UI frissítés
+    sbsPrompt.textContent = `Prompt: "${promptData.prompt_text}" (ID: ${nextPromptId})`;
+    sbsImage1.src = img1 && img1.image_url ? img1.image_url : '';
+    sbsImage2.src = img2 && img2.image_url ? img2.image_url : '';
+    sbsImage1.alt = `${currentSbsModel1} képe`;
+    sbsImage2.alt = `${currentSbsModel2} képe`;
+    sbsModel1Name.textContent = currentSbsModel1;
+    sbsModel2Name.textContent = currentSbsModel2;
+}
+
 // Event listeners
 export function initSideBySideMode() {
     // Eseményfigyelők a modellek kiválasztásához
@@ -160,6 +221,12 @@ export function initSideBySideMode() {
 
     // Eseményfigyelő a "Betöltés" gombra
     sbsLoadBtn.addEventListener('click', loadSideBySideData);
+
+    // Következő prompt gomb eseménykezelő
+    const sbsNextBtn = document.getElementById('sbs-next-btn');
+    if (sbsNextBtn) {
+        sbsNextBtn.addEventListener('click', loadNextPromptData);
+    }
 
     // Kezdeti modellek beállítása az oldalbetöltéskor (ha vannak alapértelmezett értékek a HTML-ben)
     // Ezeket az értékeket a loadSideBySideData fogja használni az első kattintáskor.

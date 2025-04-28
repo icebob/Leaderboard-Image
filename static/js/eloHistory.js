@@ -4,6 +4,7 @@ import { colorPalette } from './config.js';
 const eloHistoryChartCanvas = document.getElementById('eloHistoryChart');
 const refreshHistoryBtn = document.getElementById('refresh-history-btn');
 let eloHistoryChart = null;
+let eloHistoryRange = 'all';
 
 function formatDate(date, formatStr) {
     if (typeof date === 'string') date = new Date(date);
@@ -20,11 +21,37 @@ function formatDate(date, formatStr) {
     return `${year}.${month}.${day}. ${hours}:${minutes}`;
 }
 
+function getHistoryRangeDates(range) {
+    const now = new Date();
+    if (range === '1w') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return {from: weekAgo, to: now};
+    }
+    if (range === '2w') {
+        const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        return {from: twoWeeksAgo, to: now};
+    }
+    return null; // Teljes időtartam
+}
+
 export async function loadEloHistoryData() {
     refreshHistoryBtn.disabled = true;
     const data = await fetchData('/api/elo_history');
-    if (data) {
-        renderEloHistoryChart(data);
+    let filteredData = data;
+    if (data && eloHistoryRange !== 'all') {
+        const range = getHistoryRangeDates(eloHistoryRange);
+        if (range) {
+            filteredData = {};
+            for (const model in data) {
+                filteredData[model] = data[model].filter(point => {
+                    const t = new Date(point.x);
+                    return t >= range.from && t <= range.to;
+                });
+            }
+        }
+    }
+    if (filteredData) {
+        renderEloHistoryChart(filteredData);
     } else {
         console.error('Hiba az ELO előzmények betöltése közben.');
         if (eloHistoryChart) eloHistoryChart.destroy();
@@ -191,4 +218,10 @@ function renderEloHistoryChart(apiData) {
 
 export function initEloHistoryMode() {
     refreshHistoryBtn.addEventListener('click', loadEloHistoryData);
+    document.querySelectorAll('input[name="elo-history-range"]').forEach(radio => {
+        radio.addEventListener('change', e => {
+            eloHistoryRange = e.target.value;
+            loadEloHistoryData();
+        });
+    });
 }
