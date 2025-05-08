@@ -14,7 +14,7 @@ A Képgenerátor Aréna egy web-alapú alkalmazás, amely lehetővé teszi kül�
 ## ✨ Funkciók
 
 - 🏆 **ELO Rating:** Fejlett pontrendszer, amely figyelembe veszi az ellenfelek erősségét
-- 🖼️ **Több formátum támogatása:** JPG, JPEG és PNG
+- 🖼️ **Több formátum támogatása:** JPG, JPEG, PNG és WEBP
 - ⚙️ **Konfigurálhatóság:** Modellek, fájlformátumok és alapbeállítások külön konfigurációs fájlban
 - 👁️‍🗨️ **Vak szavazás:** Arena Battle módban a modellek nevei csak a szavazás után jelennek meg
 - 📊 **Részletes statisztikák:** ELO pontszámok, győzelmek, mérkőzések száma és győzelmi arányok
@@ -94,12 +94,13 @@ Ez a parancs törli az összes eddigi szavazatot és visszaállítja az ELO pont
 
 **Fontos:** A parancs az `elo_history` tábla tartalmát is törli, így a grafikon is tiszta lappal indul újra. Az ELO fejlődés grafikonon minden modell újra az alapértelmezett ELO pontszámról (1500) fog indulni.
 
+
 ## 📁 Rugalmas fájlkezelés
 
 A rendszer képes rugalmasan kezelni a képfájlok kiterjesztéseit. Ez azt jelenti, hogy:
 
 - ✅ Ugyanazon modell képei különböző kiterjesztésekkel szerepelhetnek különböző prompt mappákban
-- ✅ Támogatott kiterjesztések: `.jpg`, `.jpeg`, `.png`
+- ✅ Támogatott kiterjesztések: `.jpg`, `.jpeg`, `.png`, `.webp`
 - ⚠️ A fájlnév alaprésze (kiterjesztés nélkül) mindig meg kell hogy egyezzen a konfigurációban beállítottal
 
 Példa konfiguráció:

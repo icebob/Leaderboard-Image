@@ -33,7 +33,7 @@ MODELS = {
 }
 
 # Engedélyezett képkiterjesztések listája
-ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
 
 # ELO Rating beállítások
 DEFAULT_ELO = 1500  # Alapértelmezett ELO érték új modellekhez
