@@ -124,7 +124,7 @@ MODELS = {
 ## 🌟 Jelenleg támogatott modellek
 
 - Grok
-- Google Gemini Flash
+- Google Gemini Flash 2.0
 - Google Imagen 3
 - ChatGPT GPT 4o
 - Midjourney v6.1
@@ -141,6 +141,8 @@ MODELS = {
 - Dreamina Seedream 3.0
 - Ideogram 3.0
 - Piclumen Realistic V2
+- F Lite Standard
+- Google Gemini Flash 2.0 Preview 0507
 
 ## 🗄️ Adatbázis struktúra
 
