@@ -12,7 +12,7 @@ DATA_DIR = 'data'
 # - 'open_source': Boolean érték, True ha letölthető/open source modell, False ha zárt/nem letölthető
 MODELS = {
     'Grok': {'filename': 'grok', 'open_source': False},
-    'Google Gemini Flash': {'filename': 'gemini-flash', 'open_source': False},
+    'Google Gemini Flash 2.0': {'filename': 'gemini-flash', 'open_source': False},
     'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
     'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
     'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
@@ -29,7 +29,8 @@ MODELS = {
     'Dreamina Seedream 3.0': {'filename': 'dreamina-image3', 'open_source': False},
     'Ideogram 3.0': {'filename': 'ideogram3', 'open_source': False},
     'Piclumen Realistic V2': {'filename': 'piclumen-realistic-v2', 'open_source': False},
-    'F Lite Standard': {'filename': 'f-lite-standard', 'open_source': True}
+    'F Lite Standard': {'filename': 'f-lite-standard', 'open_source': True},
+    'Google Gemini Flash 2.0 Preview 0507': {'filename': 'gemini-2.0-flash-0507.jpg', 'open_source': False},
 }
 
 # Engedélyezett képkiterjesztések listája
