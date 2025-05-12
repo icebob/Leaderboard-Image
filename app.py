@@ -111,7 +111,11 @@ def reset_votes():
 @app.route('/')
 def index():
     """Főoldal megjelenítése."""
-    return render_template('index.html', models=list(MODELS.keys()), reveal_delay_ms=REVEAL_DELAY_MS)
+    # A modellek listáját névvel adjuk át a template-nek
+    models_for_template = [
+        {'id': model_id, 'name': model['name']} for model_id, model in MODELS.items()
+    ]
+    return render_template('index.html', models=models_for_template, reveal_delay_ms=REVEAL_DELAY_MS)
 
 
 # Módosítás: Engedélyezzük a .jpeg kiterjesztést is
@@ -157,92 +161,83 @@ def get_battle_data():
         return jsonify({"error": f"Prompt file not found for ID: {prompt_id}"}), 500
     except Exception as e:
          return jsonify({"error": f"Error reading prompt file: {e}"}), 500    # Válassz két KÜLÖNBÖZŐ modellt véletlenszerűen
-    model_keys = list(MODELS.keys())
-    if len(model_keys) < 2:
+    model_ids = list(MODELS.keys())
+    if len(model_ids) < 2:
         return jsonify({"error": "Not enough models defined for battle"}), 500
-    model1_key, model2_key = random.sample(model_keys, 2)
+    model1_id, model2_id = random.sample(model_ids, 2)
 
-    # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
-    model1_file = find_model_file(prompt_id, MODELS[model1_key]['filename'])
-    model2_file = find_model_file(prompt_id, MODELS[model2_key]['filename'])
-    
-    # Ha valamelyik fájl nem található, hibaüzenetet adunk vissza
+    model1_file = find_model_file(prompt_id, MODELS[model1_id]['filename'])
+    model2_file = find_model_file(prompt_id, MODELS[model2_id]['filename'])
     if not model1_file:
-        return jsonify({"error": f"Image for model {model1_key} not found in prompt {prompt_id}"}), 500
+        return jsonify({"error": f"Image for model {model1_id} not found in prompt {prompt_id}"}), 500
     if not model2_file:
-        return jsonify({"error": f"Image for model {model2_key} not found in prompt {prompt_id}"}), 500
+        return jsonify({"error": f"Image for model {model2_id} not found in prompt {prompt_id}"}), 500
 
     data = {
         "prompt_id": prompt_id,
         "prompt_text": prompt_text,
         "model1": {
-            "key": model1_key,
+            "id": model1_id,
+            "name": MODELS[model1_id]['name'],
             "image_url": f"/images/{prompt_id}/{model1_file}"
         },
         "model2": {
-            "key": model2_key,
+            "id": model2_id,
+            "name": MODELS[model2_id]['name'],
             "image_url": f"/images/{prompt_id}/{model2_file}"
         },
-        "reveal_models": False  # Új mező: a modellek neveit csak szavazás után fedjük fel
+        "reveal_models": False
     }
     return jsonify(data)
 
 @app.route('/api/side_by_side_data')
 def get_side_by_side_data():
     """Adatokat ad vissza az Arena Side-by-Side módhoz."""
-    model1_key = request.args.get('model1')
-    model2_key = request.args.get('model2')
-    # Ellenőrizzük, hogy volt-e előző prompt_id
+    model1_id = request.args.get('model1')
+    model2_id = request.args.get('model2')
     previous_prompt_id = request.args.get('previous_prompt_id', None)
 
-    if not model1_key or not model2_key:
+    if not model1_id or not model2_id:
         return jsonify({"error": "Both model1 and model2 parameters are required"}), 400
-
-    if model1_key not in MODELS or model2_key not in MODELS:
+    if model1_id not in MODELS or model2_id not in MODELS:
         return jsonify({"error": "Invalid model key provided"}), 400
-
     if not AVAILABLE_PROMPTS:
         return jsonify({"error": "No prompts available"}), 500
 
-    # Ha csak egy prompt van, nincs választási lehetőségünk
     if len(AVAILABLE_PROMPTS) == 1:
         prompt_id = AVAILABLE_PROMPTS[0]
     else:
-        # Kizárjuk az előző prompt-ot a választási lehetőségekből
         available_prompts = [p for p in AVAILABLE_PROMPTS if p != previous_prompt_id]
-        # Ha valamilyen okból az összes prompt ki lenne zárva, visszaállunk az eredeti listára
         if not available_prompts:
             available_prompts = AVAILABLE_PROMPTS
-        # Véletlenszerűen választunk, de biztosan nem az előző prompt-ot
         prompt_id = random.choice(available_prompts)
-    
-    prompt_path = os.path.join(app.config['DATA_DIR'], prompt_id, 'prompt.txt')
 
+    prompt_path = os.path.join(app.config['DATA_DIR'], prompt_id, 'prompt.txt')
     try:
         with open(prompt_path, 'r', encoding='utf-8') as f:
             prompt_text = f.read().strip()
     except FileNotFoundError:
         return jsonify({"error": f"Prompt file not found for ID: {prompt_id}"}), 500
     except Exception as e:
-         return jsonify({"error": f"Error reading prompt file: {e}"}), 500    # Megkeressük a megfelelő képfájlokat, kiterjesztéstől függetlenül
-    model1_file = find_model_file(prompt_id, MODELS[model1_key]['filename'])
-    model2_file = find_model_file(prompt_id, MODELS[model2_key]['filename'])
-    
-    # Ha valamelyik fájl nem található, hibaüzenetet adunk vissza
+        return jsonify({"error": f"Error reading prompt file: {e}"}), 500
+    model1_file = find_model_file(prompt_id, MODELS[model1_id]['filename'])
+    model2_file = find_model_file(prompt_id, MODELS[model2_id]['filename'])
     if not model1_file:
-        return jsonify({"error": f"Image for model {model1_key} not found in prompt {prompt_id}"}), 500
+        return jsonify({"error": f"Image for model {model1_id} not found in prompt {prompt_id}"}), 500
     if not model2_file:
-        return jsonify({"error": f"Image for model {model2_key} not found in prompt {prompt_id}"}), 500
+        return jsonify({"error": f"Image for model {model2_id} not found in prompt {prompt_id}"}), 500
 
     data = {
         "prompt_id": prompt_id,
         "prompt_text": prompt_text,
         "model1": {
-            "key": model1_key,
+            "id": model1_id,
+            "name": MODELS[model1_id]['name'],
             "image_url": f"/images/{prompt_id}/{model1_file}"
         },
         "model2": {
-            "key": model2_key,
+            "id": model2_id,
+            "name": MODELS[model2_id]['name'],
             "image_url": f"/images/{prompt_id}/{model2_file}"
         }
     }
@@ -252,33 +247,24 @@ def get_side_by_side_data():
 @app.route('/api/get_image')
 def get_image_for_model():
     """Visszaadja egy adott modell képének URL-jét egy adott prompt ID-hoz."""
-    model_key = request.args.get('model')
+    model_id = request.args.get('model')
     prompt_id = request.args.get('prompt_id')
 
-    if not model_key or not prompt_id:
+    if not model_id or not prompt_id:
         return jsonify({"error": "Both model and prompt_id parameters are required"}), 400
-
-    if model_key not in MODELS:
-        return jsonify({"error": f"Invalid model key provided: {model_key}"}), 400
-
+    if model_id not in MODELS:
+        return jsonify({"error": f"Invalid model key provided: {model_id}"}), 400
     if prompt_id not in AVAILABLE_PROMPTS:
-         # Lehet, hogy a prompt lista még nem frissült, próbáljuk meg újra
         update_available_prompts()
         if prompt_id not in AVAILABLE_PROMPTS:
             return jsonify({"error": f"Invalid or unavailable prompt_id: {prompt_id}"}), 400
-
-    # Megkeressük a megfelelő képfájlt
-    model_filename_base = MODELS[model_key].get('filename')
+    model_filename_base = MODELS[model_id].get('filename')
     if not model_filename_base:
-         return jsonify({"error": f"Filename configuration missing for model: {model_key}"}), 500
-
+        return jsonify({"error": f"Filename configuration missing for model: {model_id}"}), 500
     image_file = find_model_file(prompt_id, model_filename_base)
-
     if not image_file:
-        # Logolhatnánk itt, hogy miért nem található a fájl
-        print(f"Image file not found for model '{model_key}' (base: '{model_filename_base}') in prompt '{prompt_id}'")
-        return jsonify({"error": f"Image for model {model_key} not found in prompt {prompt_id}"}), 404 # 404 jobb itt
-
+        print(f"Image file not found for model '{model_id}' (base: '{model_filename_base}') in prompt '{prompt_id}'")
+        return jsonify({"error": f"Image for model {model_id} not found in prompt {prompt_id}"}), 404
     image_url = f"/images/{prompt_id}/{image_file}"
     return jsonify({"image_url": image_url})
 
@@ -293,25 +279,19 @@ def record_vote():
 
     if not all([prompt_id, winner, loser]):
         return jsonify({"error": "Missing data for vote"}), 400
-
     if winner not in MODELS or loser not in MODELS:
-         return jsonify({"error": "Invalid model name in vote"}), 400
-
+        return jsonify({"error": "Invalid model id in vote"}), 400
     try:
         db = get_db()
         with db:
-            # Szavazat rögzítése
             db.execute(
                 'INSERT INTO votes (prompt_id, winner, loser) VALUES (?, ?, ?)',
                 (prompt_id, winner, loser)
             )
-            
-            # ELO értékek frissítése
             winner_new_elo, loser_new_elo = update_elo(db, winner, loser)
             db.commit()
-            
         return jsonify({
-            "success": True, 
+            "success": True,
             "message": f"Vote recorded for {winner} against {loser}",
             "winner_new_elo": round(winner_new_elo, 1),
             "loser_new_elo": round(loser_new_elo, 1)
@@ -327,15 +307,10 @@ def record_vote():
 def get_leaderboard():
     """Leaderboard adatok lekérdezése és kiszámítása."""    
     try:
-        # Opcionális szűrési paraméter: model_type lehet 'all', 'open-source' vagy 'closed-source'
         model_type = request.args.get('model_type', 'all')
-        
         db = get_db()
-        # Összes győzelem számolása modellenként
         wins_cursor = db.execute('''SELECT winner, COUNT(*) as win_count FROM votes GROUP BY winner''')
         wins = {row['winner']: row['win_count'] for row in wins_cursor.fetchall()}
-
-        # Összes meccs számolása modellenként (győztesként VAGY vesztesként)
         total_matches_cursor = db.execute('''SELECT model, COUNT(*) as match_count FROM (
                 SELECT winner as model FROM votes
                 UNION ALL
@@ -343,39 +318,30 @@ def get_leaderboard():
             )
             GROUP BY model''')
         total_matches = {row['model']: row['match_count'] for row in total_matches_cursor.fetchall()}
-        
-        # ELO értékek lekérdezése a model_elo táblából
         elo_cursor = db.execute('SELECT model, elo FROM model_elo')
         elo_ratings = {row['model']: row['elo'] for row in elo_cursor.fetchall()}
 
         leaderboard = []
-        all_model_keys = list(MODELS.keys())
-        for model in all_model_keys:
-            # Szűrés model_type alapján
-            is_open_source = MODELS[model]['open_source']
+        for model_id, model in MODELS.items():
+            is_open_source = model['open_source']
             if (model_type == 'open-source' and not is_open_source) or \
                (model_type == 'closed-source' and is_open_source):
                 continue
-                
-            model_wins = wins.get(model, 0)
-            model_matches = total_matches.get(model, 0)
+            model_wins = wins.get(model_id, 0)
+            model_matches = total_matches.get(model_id, 0)
             win_rate = (model_wins / model_matches * 100) if model_matches > 0 else 0
-            elo = elo_ratings.get(model, DEFAULT_ELO)  # Ha nincs ELO érték, használjuk az alapértelmezettet
-
+            elo = elo_ratings.get(model_id, DEFAULT_ELO)
             leaderboard.append({
-                "model": model,
+                "id": model_id,
+                "name": model['name'],
                 "wins": model_wins,
                 "matches": model_matches,
                 "win_rate": round(win_rate, 2),
-                "elo": round(elo, 1),  # Egy tizedesjegyre kerekítjük az ELO értéket
-                "open_source": is_open_source  # Hozzáadjuk az open_source tulajdonságot
+                "elo": round(elo, 1),
+                "open_source": is_open_source
             })
-
-        # Rendezés ELO pontszám szerint csökkenő sorrendben
         leaderboard.sort(key=lambda x: x['elo'], reverse=True)
-
         return jsonify(leaderboard)
-
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return jsonify({"error": "Database error while fetching leaderboard"}), 500
@@ -388,26 +354,35 @@ def get_elo_history():
     """Lekérdezi az ELO értékek időbeli változását a grafikonhoz."""
     try:
         db = get_db()
-        cursor = db.execute('''
+        cursor = db.execute("""
             SELECT model, elo, timestamp 
             FROM elo_history 
             ORDER BY timestamp ASC
-        ''')
+        """)
         history_data = cursor.fetchall()
         
         # Adatok átalakítása a grafikonhoz megfelelő formátumba
-        # { model1: [{x: timestamp, y: elo}, ...], model2: [...] }
-        chart_data = {}
+        # { "Modell Neve": [{x: timestamp, y: elo}, ...], ... }
+        chart_data_for_frontend = {}
         for row in history_data:
-            model = row['model']
-            if model not in chart_data:
-                chart_data[model] = []
-            chart_data[model].append({
-                'x': row['timestamp'],
+            model_id = row['model']
+            
+            # Biztosítjuk, hogy a model_id létezik a MODELS konfigurációban
+            if model_id not in MODELS:
+                print(f"Figyelem: a(z) {model_id} model_id az elo_history táblából nem található a MODELS konfigurációban. Kihagyva.")
+                continue
+
+            model_name = MODELS[model_id]['name'] # Modell nevének lekérése
+
+            if model_name not in chart_data_for_frontend:
+                chart_data_for_frontend[model_name] = []
+            
+            chart_data_for_frontend[model_name].append({
+                'x': row['timestamp'], # A timestamp string formátumban van, amit a JS new Date() kezel
                 'y': round(row['elo'], 1)
             })
             
-        return jsonify(chart_data)
+        return jsonify(chart_data_for_frontend)
     except sqlite3.Error as e:
         print(f"Database error fetching ELO history: {e}")
         return jsonify({"error": "Database error while fetching ELO history"}), 500

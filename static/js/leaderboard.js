@@ -28,7 +28,7 @@ export async function loadLeaderboardData() {
                 
                 tr.innerHTML = `
                     <td>${index + 1}</td>
-                    <td>${row.model}</td>
+                    <td>${row.name}</td>
                     <td><strong>${row.elo}</strong></td>
                     <td>${row.wins}</td>
                     <td>${row.matches}</td>

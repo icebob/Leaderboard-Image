@@ -24,56 +24,45 @@ def calculate_new_elo(rating, expected_score, actual_score, k_factor=K_FACTOR):
     """
     return rating + k_factor * (actual_score - expected_score)
 
-def get_current_elo(db, model_name):
+def get_current_elo(db, model_id):
     """
-    Lekérdezi a modell aktuális ELO értékét az adatbázisból.
+    Lekérdezi a modell aktuális ELO értékét az adatbázisból az ID alapján.
     Ha még nincs ELO értéke, az alapértelmezett értéket adja vissza.
     """
     try:
-        cur = db.execute('SELECT elo FROM model_elo WHERE model = ?', (model_name,))
+        cur = db.execute('SELECT elo FROM model_elo WHERE model = ?', (model_id,))
         result = cur.fetchone()
         if result:
             return result['elo']
         else:
-            # Ha nincs még ELO értéke, hozzáadjuk az alapértelmezett értékkel
             db.execute('INSERT INTO model_elo (model, elo) VALUES (?, ?)', 
-                      (model_name, DEFAULT_ELO))
+                      (model_id, DEFAULT_ELO))
             db.commit()
             return DEFAULT_ELO
     except Exception as e:
-        print(f"Error getting ELO for {model_name}: {e}")
+        print(f"Error getting ELO for {model_id}: {e}")
         return DEFAULT_ELO
 
-def update_elo(db, winner_model, loser_model):
+def update_elo(db, winner_id, loser_id):
     """
     Frissíti a nyertes és vesztes modellek ELO értékét egy mérkőzés után,
-    és rögzíti a változást a historikus táblában.
+    és rögzíti a változást a historikus táblában. Azonosítóval dolgozik.
     """
-# Lekérdezzük a jelenlegi ELO értékeket
-# Lekérdezzük a jelenlegi ELO értékeket
-    winner_elo = get_current_elo(db, winner_model)
-    loser_elo = get_current_elo(db, loser_model)
-    
+    winner_elo = get_current_elo(db, winner_id)
+    loser_elo = get_current_elo(db, loser_id)
     winner_expected = calculate_expected_score(winner_elo, loser_elo)
     loser_expected = calculate_expected_score(loser_elo, winner_elo)
-    
-# Új ELO értékek számítása
     winner_new_elo = calculate_new_elo(winner_elo, winner_expected, 1)
     loser_new_elo = calculate_new_elo(loser_elo, loser_expected, 0)
-    
-    # Értékek frissítése az adatbázisban (model_elo)
     current_timestamp = datetime.datetime.now()
     db.execute('UPDATE model_elo SET elo = ?, last_updated = ? WHERE model = ?', 
-              (winner_new_elo, current_timestamp, winner_model))
+              (winner_new_elo, current_timestamp, winner_id))
     db.execute('UPDATE model_elo SET elo = ?, last_updated = ? WHERE model = ?', 
-              (loser_new_elo, current_timestamp, loser_model))
-              
-    # Változás rögzítése a historikus táblában (elo_history)
+              (loser_new_elo, current_timestamp, loser_id))
     db.execute('INSERT INTO elo_history (model, elo, timestamp) VALUES (?, ?, ?)',
-              (winner_model, winner_new_elo, current_timestamp))
+              (winner_id, winner_new_elo, current_timestamp))
     db.execute('INSERT INTO elo_history (model, elo, timestamp) VALUES (?, ?, ?)',
-              (loser_model, loser_new_elo, current_timestamp))
-    
+              (loser_id, loser_new_elo, current_timestamp))
     return winner_new_elo, loser_new_elo
 
 def get_db():
