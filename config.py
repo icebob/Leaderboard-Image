@@ -14,7 +14,7 @@ MODELS = {
     'Grok': {'filename': 'grok', 'open_source': False},
     'Google Gemini Flash 2.0': {'filename': 'gemini-flash', 'open_source': False},
     'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
-    'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
+    'GPT Image 1': {'filename': 'gpt-image-1', 'open_source': False},
     'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
     'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
     'Reve': {'filename': 'reve', 'open_source': False},

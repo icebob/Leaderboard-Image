@@ -126,7 +126,7 @@ MODELS = {
 - Grok
 - Google Gemini Flash 2.0
 - Google Imagen 3
-- ChatGPT GPT 4o
+- GPT Image 1
 - Midjourney v6.1
 - Midjourney v7
 - Midjourney v7 20250501
