@@ -11,27 +11,38 @@ const sbsImage1 = document.getElementById('sbs-image1');
 const sbsModel2Name = document.getElementById('sbs-model2-name');
 const sbsImage2 = document.getElementById('sbs-image2');
 
+// Helper function to get model name from ID
+function getModelNameById(modelId) {
+    if (!window.MODELS_DATA) {
+        console.warn("window.MODELS_DATA not available yet for getModelNameById");
+        return modelId; // Fallback to ID
+    }
+    const modelData = window.MODELS_DATA.find(m => m.id === modelId);
+    return modelData ? modelData.name : modelId; // Fallback to ID if not found
+}
+
 // Állapot
 let currentSbsModel1 = '';
 let currentSbsModel2 = '';
 let currentPromptId = null; // Az aktuális prompt azonosítója
 
 // Új funkció kép betöltéséhez modellváltáskor
-async function fetchModelImage(modelName, promptId, imageElement, modelNameElement) {
-    if (!promptId || !modelName) return; // Ne csináljon semmit, ha nincs prompt vagy modell
+async function fetchModelImage(modelId, promptId, imageElement, modelNameElement) {
+    if (!promptId || !modelId) return; // Ne csináljon semmit, ha nincs prompt vagy modell
 
-    modelNameElement.textContent = modelName; // Azonnal frissítjük a nevet
+    const displayName = getModelNameById(modelId);
+    modelNameElement.textContent = displayName; // Azonnal frissítjük a nevet
     const currentSrc = imageElement.src; // Mentsük el a jelenlegi src-t a visszaállításhoz hiba esetén
     imageElement.src = ""; // Töröljük az előző képet / loading state
-    imageElement.alt = `${modelName} képének betöltése...`;
+    imageElement.alt = `${displayName} képének betöltése...`;
 
     try {
         // Feltételezünk egy új API végpontot: /api/get_image?model=...&prompt_id=...
-        const apiUrl = `/api/get_image?model=${encodeURIComponent(modelName)}&prompt_id=${promptId}`;
+        const apiUrl = `/api/get_image?model=${encodeURIComponent(modelId)}&prompt_id=${promptId}`;
         const data = await fetchData(apiUrl);
         if (data && data.image_url) {
             imageElement.src = data.image_url;
-            imageElement.alt = `${modelName} képe`; // Sikeres betöltés utáni alt text
+            imageElement.alt = `${displayName} képe`; // Sikeres betöltés utáni alt text
         } else {
             console.error("Hiba a kép URL lekérésekor vagy hiányzó image_url:", data);
             imageElement.alt = "Kép betöltése sikertelen"; // Hiba jelzése
@@ -40,7 +51,7 @@ async function fetchModelImage(modelName, promptId, imageElement, modelNameEleme
             // Vagy placeholder: imageElement.src = "/static/images/placeholder.png";
         }
     } catch (error) {
-        console.error(`Hiba a(z) ${modelName} képének betöltésekor:`, error);
+        console.error(`Hiba a(z) ${displayName} képének betöltésekor:`, error);
         imageElement.alt = "Kép betöltése sikertelen";
          // Hiba esetén visszaállíthatjuk az előző képet, ha volt
          // if (currentSrc) imageElement.src = currentSrc;
@@ -70,11 +81,11 @@ async function loadSideBySideData() {
 
     sbsImage1.src = "";
     sbsImage2.src = "";
-    sbsImage1.alt = "Kép betöltése...";
-    sbsImage2.alt = "Kép betöltése...";
+    sbsImage1.alt = `${getModelNameById(currentSbsModel1)} képének betöltése...`;
+    sbsImage2.alt = `${getModelNameById(currentSbsModel2)} képének betöltése...`;
     sbsPrompt.textContent = "Prompt betöltése...";
-    sbsModel1Name.textContent = currentSbsModel1;
-    sbsModel2Name.textContent = currentSbsModel2;
+    sbsModel1Name.textContent = getModelNameById(currentSbsModel1);
+    sbsModel2Name.textContent = getModelNameById(currentSbsModel2);
     sbsLoadBtn.disabled = true;
 
     // Mindig új promptot kérünk a "Betöltés" gombbal
@@ -92,20 +103,21 @@ async function loadSideBySideData() {
         sbsPrompt.textContent = `Prompt: "${data.prompt_text}" (ID: ${data.prompt_id})`;
         sbsImage1.src = data.model1.image_url;
         sbsImage2.src = data.model2.image_url;
-        sbsImage1.alt = `${currentSbsModel1} képe`;
-        sbsImage2.alt = `${currentSbsModel2} képe`;
-        // Név frissítése itt is, bár már fentebb megtörtént
-        sbsModel1Name.textContent = currentSbsModel1;
-        sbsModel2Name.textContent = currentSbsModel2;
+        sbsImage1.alt = `${data.model1.name} képe`; // Use name from API response
+        sbsImage2.alt = `${data.model2.name} képe`; // Use name from API response
+        // Név frissítése itt is, a API válaszból
+        sbsModel1Name.textContent = data.model1.name; // Use name from API response
+        sbsModel2Name.textContent = data.model2.name; // Use name from API response
 
     } else {
         sbsPrompt.textContent = "Hiba a prompt betöltése közben.";
-        console.error("Hiba a side-by-side adatok lekérésekor:", data);
+        console.error("Hiba a side-by-side adatok lekérésekor:", data); // data can be null or {error: ...}
         currentPromptId = null; // Hiba esetén nullázzuk
-        sbsModel1Name.textContent = currentSbsModel1; // Nevek maradjanak? Vagy töröljük?
-        sbsModel2Name.textContent = currentSbsModel2;
-        sbsImage1.alt = "Hiba";
-        sbsImage2.alt = "Hiba";
+        // Keep displaying names based on selection if API fails
+        sbsModel1Name.textContent = getModelNameById(currentSbsModel1);
+        sbsModel2Name.textContent = getModelNameById(currentSbsModel2);
+        sbsImage1.alt = "Hiba a képbetöltéskor";
+        sbsImage2.alt = "Hiba a képbetöltéskor";
     }
     sbsLoadBtn.disabled = false;
 }
@@ -165,10 +177,10 @@ async function loadNextPromptData() {
     sbsPrompt.textContent = `Prompt: "${promptData.prompt_text}" (ID: ${nextPromptId})`;
     sbsImage1.src = img1 && img1.image_url ? img1.image_url : '';
     sbsImage2.src = img2 && img2.image_url ? img2.image_url : '';
-    sbsImage1.alt = `${currentSbsModel1} képe`;
-    sbsImage2.alt = `${currentSbsModel2} képe`;
-    sbsModel1Name.textContent = currentSbsModel1;
-    sbsModel2Name.textContent = currentSbsModel2;
+    sbsImage1.alt = `${getModelNameById(currentSbsModel1)} képe`;
+    sbsImage2.alt = `${getModelNameById(currentSbsModel2)} képe`;
+    sbsModel1Name.textContent = getModelNameById(currentSbsModel1);
+    sbsModel2Name.textContent = getModelNameById(currentSbsModel2);
 }
 
 // Event listeners
