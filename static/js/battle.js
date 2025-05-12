@@ -43,8 +43,7 @@ export async function loadBattleData() {
     if (data) {
         currentBattleData = data;
         battlePrompt.textContent = `Prompt: "${data.prompt_text}" (ID: ${data.prompt_id})`;
-        battleModel1Name.textContent = data.model1.name;
-        battleModel2Name.textContent = data.model2.name;
+        // A modellek valódi neveit itt már nem állítjuk be, csak a szavazás után.
         battleImage1.src = data.model1.image_url;
         battleImage2.src = data.model2.image_url;
         disableVoting(false);
@@ -115,6 +114,33 @@ export function initBattleMode() {
             }, getRevealDelayMs());
         } else {
             loadBattleData();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        // Prevent shortcuts if user is typing in an input, textarea, or contentEditable element
+        const targetTagName = event.target.tagName;
+        if (targetTagName === 'INPUT' || targetTagName === 'TEXTAREA' || event.target.isContentEditable) {
+            return;
+        }
+
+        // Check if the battle mode UI is currently visible and active
+        // and if voting is currently allowed (buttons are not disabled)
+        // battleModeDiv.offsetParent will be null if the element or its parents are display:none
+        if (battleModeDiv.offsetParent === null || !currentBattleData || voteBtn1.disabled) {
+            return;
+        }
+
+        switch (event.key) {
+            case '1':
+                voteBtn1.click();
+                break;
+            case '2':
+                voteBtn2.click();
+                break;
+            case '0':
+                tieBtn.click();
+                break;
         }
     });
 }
