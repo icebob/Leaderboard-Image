@@ -31,6 +31,7 @@ MODELS = {
     'Piclumen Realistic V2': {'filename': 'piclumen-realistic-v2', 'open_source': False},
     'F Lite Standard': {'filename': 'f-lite-standard', 'open_source': True},
     'Google Gemini Flash 2.0 Preview 0507': {'filename': 'gemini-2.0-flash-0507', 'open_source': False},
+    'Midjourney v7 20250501': {'filename': 'midjourneyv7-20250501', 'open_source': False},
 }
 
 # Engedélyezett képkiterjesztések listája

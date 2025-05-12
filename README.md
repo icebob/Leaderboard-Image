@@ -129,6 +129,7 @@ MODELS = {
 - ChatGPT GPT 4o
 - Midjourney v6.1
 - Midjourney v7
+- Midjourney v7 20250501
 - Reve
 - HiDream-I1
 - Lumina-Image-2.0
