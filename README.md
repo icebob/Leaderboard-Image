@@ -144,6 +144,7 @@ MODELS = {
 - Piclumen Realistic V2
 - F Lite Standard
 - Google Gemini Flash 2.0 Preview 0507
+- Tencent Hunyuan Image 2.0
 
 ## 🗄️ Adatbázis struktúra
 
