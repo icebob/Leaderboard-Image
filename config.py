@@ -33,6 +33,7 @@ MODELS = {
     'model-020': {'name': 'Google Gemini Flash 2.0 Preview 0507', 'filename': 'gemini-2.0-flash-0507', 'open_source': False},
     'model-021': {'name': 'Midjourney v7 20250501', 'filename': 'midjourneyv7-20250501', 'open_source': False},
     'model-022': {'name': 'Tencent Hunyuan Image 2.0', 'filename': 'hunyuan-image-2.0', 'open_source': False},
+    'model-023': {'name': 'Google Imagen 4', 'filename': 'imagen4', 'open_source': False},
 }
 
 # Engedélyezett képkiterjesztések listája
