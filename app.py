@@ -390,6 +390,57 @@ def get_elo_history():
         print(f"Error fetching ELO history: {e}")
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+@app.route('/api/elo_history_with_current_elo')
+def get_elo_history_with_current_elo():
+    """Lekérdezi az ELO értékek időbeli változását és az aktuális ELO pontszámokat."""
+    try:
+        db = get_db()
+        
+        # ELO History
+        history_cursor = db.execute("""
+            SELECT model, elo, timestamp 
+            FROM elo_history 
+            ORDER BY timestamp ASC
+        """)
+        history_data_rows = history_cursor.fetchall()
+        
+        chart_data_for_frontend = {}
+        for row in history_data_rows:
+            model_id = row['model']
+            if model_id not in MODELS:
+                print(f"Figyelem: a(z) {model_id} model_id az elo_history táblából nem található a MODELS konfigurációban. Kihagyva.")
+                continue
+            model_name = MODELS[model_id]['name']
+            if model_name not in chart_data_for_frontend:
+                chart_data_for_frontend[model_name] = []
+            chart_data_for_frontend[model_name].append({
+                'x': row['timestamp'],
+                'y': round(row['elo'], 1)
+            })
+
+        # Current ELOs
+        elo_cursor = db.execute('SELECT model, elo FROM model_elo')
+        current_elos_raw = {row['model']: row['elo'] for row in elo_cursor.fetchall()}
+        
+        current_elos_for_frontend = {}
+        for model_id, elo_score in current_elos_raw.items():
+            if model_id in MODELS: # Ensure model_id is valid
+                 current_elos_for_frontend[MODELS[model_id]['name']] = round(elo_score, 1)
+            else:
+                print(f"Figyelem: a(z) {model_id} model_id az model_elo táblából nem található a MODELS konfigurációban (current ELOs). Kihagyva.")
+
+
+        return jsonify({
+            "history": chart_data_for_frontend,
+            "current_elos": current_elos_for_frontend
+        })
+    except sqlite3.Error as e:
+        print(f"Database error fetching ELO history with current ELOs: {e}")
+        return jsonify({"error": "Database error while fetching ELO history with current ELOs"}), 500
+    except Exception as e:
+        print(f"Error fetching ELO history with current ELOs: {e}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
 @app.route('/api/prompt_ids')
 def get_prompt_ids_api():
     """Visszaadja az összes prompt ID-t (sorrendben)."""

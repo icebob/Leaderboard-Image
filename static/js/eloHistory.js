@@ -3,8 +3,11 @@ import { colorPalette } from './config.js';
 
 const eloHistoryChartCanvas = document.getElementById('eloHistoryChart');
 const refreshHistoryBtn = document.getElementById('refresh-history-btn');
+const topNSlider = document.getElementById('top-n-slider');
+const topNValue = document.getElementById('top-n-value');
 let eloHistoryChart = null;
 let eloHistoryRange = 'all';
+let topNCount = 1; // Default to showing top 1
 
 function formatDate(date, formatStr) {
     if (typeof date === 'string') date = new Date(date);
@@ -36,29 +39,58 @@ function getHistoryRangeDates(range) {
 
 export async function loadEloHistoryData() {
     refreshHistoryBtn.disabled = true;
-    const data = await fetchData('/api/elo_history');
-    let filteredData = data;
+    const rawData = await fetchData('/api/elo_history_with_current_elo'); // Assuming an endpoint that also returns current ELO for sorting
+    if (!rawData || !rawData.history) {
+        console.error('Hiba az ELO előzmények betöltése közben vagy hiányos adatok.');
+        if (eloHistoryChart) eloHistoryChart.destroy();
+        const ctx = eloHistoryChartCanvas.getContext('2d');
+        ctx.clearRect(0, 0, eloHistoryChartCanvas.width, eloHistoryChartCanvas.height);
+        ctx.textAlign = 'center';
+        ctx.fillText('Hiba a grafikon adatainak betöltése közben.', eloHistoryChartCanvas.width/2, eloHistoryChartCanvas.height/2);
+        refreshHistoryBtn.disabled = false;
+        return;
+    }
+
+    const data = rawData.history;
+    const currentElos = rawData.current_elos; // { modelName: elo, ... }
+
+    let filteredDataByDate = data;
     if (data && eloHistoryRange !== 'all') {
         const range = getHistoryRangeDates(eloHistoryRange);
         if (range) {
-            filteredData = {};
+            filteredDataByDate = {};
             for (const model in data) {
-                filteredData[model] = data[model].filter(point => {
+                filteredDataByDate[model] = data[model].filter(point => {
                     const t = new Date(point.x);
                     return t >= range.from && t <= range.to;
                 });
             }
         }
     }
-    if (filteredData) {
-        renderEloHistoryChart(filteredData);
+
+    // Filter by Top N based on current ELO scores
+    const sortedModelsByElo = Object.entries(currentElos)
+        .sort(([,a],[,b]) => b - a) // Sort by ELO descending
+        .map(([modelName]) => modelName);
+
+    const topNModelsToShow = sortedModelsByElo.slice(0, topNCount);
+
+    const finalFilteredData = {};
+    for (const model of topNModelsToShow) {
+        if (filteredDataByDate[model]) {
+            finalFilteredData[model] = filteredDataByDate[model];
+        }
+    }
+
+    if (Object.keys(finalFilteredData).length > 0) {
+        renderEloHistoryChart(finalFilteredData, Object.keys(data).length); // Pass total model count for slider max
     } else {
-        console.error('Hiba az ELO előzmények betöltése közben.');
+        console.error('Nincs adat a megadott szűrőkkel.');
         if (eloHistoryChart) eloHistoryChart.destroy();
         const ctx = eloHistoryChartCanvas.getContext('2d');
         ctx.clearRect(0, 0, eloHistoryChartCanvas.width, eloHistoryChartCanvas.height);
         ctx.textAlign = 'center';
-        ctx.fillText('Hiba a grafikon adatainak betöltése közben.', eloHistoryChartCanvas.width/2, eloHistoryChartCanvas.height/2);
+        ctx.fillText('Nincs adat a megadott szűrőkkel.', eloHistoryChartCanvas.width/2, eloHistoryChartCanvas.height/2);
     }
     refreshHistoryBtn.disabled = false;
 }
@@ -72,8 +104,27 @@ function hexToRgba(hex, alpha) {
     return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function renderEloHistoryChart(apiData) {
+function renderEloHistoryChart(apiData, totalModelCount) {
     if (eloHistoryChart) eloHistoryChart.destroy();
+
+    // Update slider max value and current display
+    if (topNSlider && totalModelCount > 0) {
+        topNSlider.max = totalModelCount;
+        // Ensure current slider value is not out of bounds if totalModelCount changed
+        if (parseInt(topNSlider.value) > totalModelCount) {
+            topNSlider.value = totalModelCount;
+        }
+        if (topNValue) {
+            topNValue.textContent = topNSlider.value;
+        }
+        topNCount = parseInt(topNSlider.value);
+    } else if (topNSlider) {
+        topNSlider.max = 1; // Default if no models
+        topNSlider.value = 1;
+        if (topNValue) {
+            topNValue.textContent = '1';
+        }
+    }
 
     // 1. Collect all unique timestamps and sort them
     const allTimestamps = new Set();
@@ -224,4 +275,17 @@ export function initEloHistoryMode() {
             loadEloHistoryData();
         });
     });
+
+    if (topNSlider && topNValue) {
+        topNSlider.addEventListener('input', (event) => {
+            topNValue.textContent = event.target.value;
+        });
+        topNSlider.addEventListener('change', (event) => {
+            topNCount = parseInt(event.target.value);
+            loadEloHistoryData();
+        });
+        // Initialize slider display value
+        topNValue.textContent = topNSlider.value;
+        topNCount = parseInt(topNSlider.value);
+    }
 }

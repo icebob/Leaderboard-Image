@@ -157,6 +157,13 @@
                     <label class="btn btn-outline-primary" for="elo-range-all">Teljes időtartam</label>
                 </div>
             </div>
+            <!-- Slider for Top N Models -->
+            <div class="row mb-3 justify-content-center align-items-center">
+                <div class="col-md-8 col-lg-6">
+                    <label for="top-n-slider" class="form-label">Megjelenített top modellek száma: <span id="top-n-value" class="fw-bold">1</span></label>
+                    <input type="range" class="form-range" id="top-n-slider" min="1" value="1" step="1">
+                </div>
+            </div>
             <div class="chart-container" style="position: relative; height:60vh; width:80vw; margin: auto;">
                 <canvas id="eloHistoryChart"></canvas>
             </div>
