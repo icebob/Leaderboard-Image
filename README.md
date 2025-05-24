@@ -146,6 +146,7 @@ MODELS = {
 - Google Gemini Flash 2.0 Preview 0507
 - Tencent Hunyuan Image 2.0
 - Google Imagen 4
+- Recraft V3 Raw
 
 ## 🗄️ Adatbázis struktúra
 
