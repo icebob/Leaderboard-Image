@@ -414,22 +414,18 @@ flask run --host=0.0.0.0
                 A rendszer konfigurációs beállításai a <code>config.py</code> fájlban találhatók. Itt módosíthatók a következő beállítások:
             </p>
               <div class="code-block">                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó adatok
+            <div class="code-block">
+                <pre class="bg-light p-3 rounded"><code># Modell nevek és a hozzájuk tartozó adatok
 # Minden modell egy szótár, ami tartalmazza:
 # - 'filename': A fájlnév alaprésze kiterjesztés nélkül
 # - 'open_source': Boolean érték, True ha letölthető/open source modell, False ha zárt/nem letölthető
 MODELS = {
-    'Grok': {'filename': 'grok', 'open_source': False},
-    'Google Gemini Flash': {'filename': 'gemini-flash', 'open_source': False},
-    'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
-    'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
-    'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
-    'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
-    'Reve': {'filename': 'reve', 'open_source': False},
-    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True},
-    'Lumina-Image-2.0': {'filename': 'lumina2', 'open_source': True},
-    #'Ideogram 3': {'filename': 'ideogram3', 'open_source': False},
-    #'Flux 11 Ultra': {'filename': 'flux11ultra', 'open_source': False}
-}</code></pre>
+    'model-001': {'name': 'Grok', 'filename': 'grok', 'open_source': False},
+    'model-002': {'name': 'Google Gemini Flash 2.0', 'filename': 'gemini-flash', 'open_source': False},
+    'model-003': {'name': 'Google Imagen 3', 'filename': 'imagen3', 'open_source': False},
+    # ... további modellek a config.py alapján ...
+}
+</code></pre>
             </div>
 
             <h4 class="mt-4"><i class="bi bi-hourglass-split"></i> Konfigurálható várakozási idő</h4>
@@ -522,12 +518,9 @@ REVEAL_DELAY_MS = 2500  # Szavazás után a modellek neveinek megjelenítési id
 
         <section id="api-endpoints" class="mb-5">
             <h2 class="border-bottom pb-2">API végpontok</h2>
-            
-            <p>A rendszer a következő fő API végpontokat biztosítja:</p>
-            
             <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead class="table-dark">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
                         <tr>
                             <th>Végpont</th>
                             <th>Metódus</th>
@@ -535,23 +528,20 @@ REVEAL_DELAY_MS = 2500  # Szavazás után a modellek neveinek megjelenítési id
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><code>/api/battle_data</code></td>
-                            <td>GET</td>
-                            <td>Véletlenszerűen kiválaszt két modellt és egy promptot, visszaadja a szükséges képek URL-jeit a csatához.</td>
-                        </tr>
-                        <tr>
-                            <td><code>/api/side_by_side_data</code></td>
-                            <td>GET</td>
-                            <td>Két megadott modellhez és egy véletlenszerű prompthoz visszaadja a képek URL-jeit.</td>
-                        </tr>
-                        <tr>
-                            <td><code>/api/vote</code></td>
-                            <td>POST</td>
-                            <td>Rögzíti a felhasználó szavazatát és frissíti az ELO értékeket.</td>
-                        </tr>
-                        <tr>
-                            <td><code>/api/leaderboard</code></td>
+                        <tr><td><code>/</code></td><td>GET</td><td>A főoldal megjelenítése.</td></tr>
+                        <tr><td><code>/images/&lt;prompt_id&gt;/&lt;filename&gt;</code></td><td>GET</td><td>Képfájlok kiszolgálása a <code>data</code> mappából.</td></tr>
+                        <tr><td><code>/api/battle_data</code></td><td>GET</td><td>Adatokat ad vissza az Arena Battle módhoz (prompt, két véletlenszerű modell képei és nevei).</td></tr>
+                        <tr><td><code>/api/side_by_side_data</code></td><td>GET</td><td>Adatokat ad vissza a Side-by-Side módhoz (prompt, két kiválasztott modell képei és nevei).</td></tr>
+                        <tr><td><code>/api/get_image</code></td><td>GET</td><td>Visszaadja egy adott modell képének URL-jét egy adott prompt ID-hoz (Side-by-Side módhoz használt).</td></tr>
+                        <tr><td><code>/api/vote</code></td><td>POST</td><td>Rögzíti a felhasználó szavazatát (győztes, vesztes) és frissíti az ELO értékeket.</td></tr>
+                        <tr><td><code>/api/leaderboard</code></td><td>GET</td><td>Visszaadja az aktuális Leaderboard adatokat (modellek neve, ELO, győzelmek, meccsek, győzelmi arány, open source státusz).</td></tr>
+                        <tr><td><code>/api/elo_history</code></td><td>GET</td><td>(Elavult lehet) Visszaadja az ELO értékek időbeli változásait a modellek grafikonos megjelenítéséhez.</td></tr>
+                        <tr><td><code>/api/elo_history_with_current_elo</code></td><td>GET</td><td>Visszaadja az ELO értékek időbeli változásait (<code>history</code>) és az aktuális ELO pontszámokat (<code>current_elos</code>) a grafikonhoz és szűréshez.</td></tr>
+                        <tr><td><code>/api/prompt_ids</code></td><td>GET</td><td>Visszaadja az összes elérhető prompt ID-t.</td></tr>
+                        <tr><td><code>/api/prompt_text</code></td><td>GET</td><td>Visszaadja a prompt szövegét egy adott prompt_id-hoz.</td></tr>
+                    </tbody>
+                </table>
+            </div>
                             <td>GET</td>
                             <td>Visszaadja az aktuális Leaderboard adatokat (ELO, győzelmek, meccsek, arányok).</td>
                         </tr>

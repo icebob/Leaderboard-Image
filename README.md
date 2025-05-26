@@ -110,14 +110,10 @@ Példa konfiguráció:
 # - 'filename': A fájlnév alaprésze kiterjesztés nélkül
 # - 'open_source': Boolean érték, True ha letölthető/open source modell, False ha zárt/nem letölthető
 MODELS = {
-    'Grok': {'filename': 'grok', 'open_source': False},
-    'Google Gemini Flash': {'filename': 'gemini-flash', 'open_source': False},
-    'Google Imagen 3': {'filename': 'imagen3', 'open_source': False},
-    'ChatGPT GPT 4o': {'filename': 'gpt4o', 'open_source': False},
-    'Midjourney v6.1': {'filename': 'midjourneyv61', 'open_source': False},
-    'Midjourney v7': {'filename': 'midjourneyv7', 'open_source': False},
-    'Reve': {'filename': 'reve', 'open_source': False},
-    'HiDream-I1': {'filename': 'hidreami1', 'open_source': True}
+    'model-001': {'name': 'Grok', 'filename': 'grok', 'open_source': False},
+    'model-002': {'name': 'Google Gemini Flash 2.0', 'filename': 'gemini-flash', 'open_source': False},
+    'model-003': {'name': 'Google Imagen 3', 'filename': 'imagen3', 'open_source': False},
+    # ... további modellek a config.py alapján ...
 }
 ```
 
@@ -152,41 +148,53 @@ MODELS = {
 
 A rendszer három fő táblát használ:
 
-1. **votes** - A felhasználói szavazatok tárolására
-   ```
-   id INTEGER PRIMARY KEY
-   prompt_id TEXT
-   winner TEXT
-   loser TEXT
-   voted_at TIMESTAMP
-   ```
+1.  **votes** - A felhasználói szavazatok tárolására
+    ```sql
+    CREATE TABLE votes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        prompt_id TEXT NOT NULL,
+        winner TEXT NOT NULL, -- Modell azonosító (pl. 'model-001')
+        loser TEXT NOT NULL,  -- Modell azonosító (pl. 'model-002')
+        voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    ```
 
-2. **model_elo** - A modellek aktuális ELO pontszámainak tárolására
-   ```
-   model TEXT PRIMARY KEY
-   elo REAL
-   last_updated TIMESTAMP
-   ```
+2.  **model_elo** - A modellek aktuális ELO pontszámainak tárolására
+    ```sql
+    CREATE TABLE model_elo (
+        model TEXT PRIMARY KEY, -- Modell azonosító (pl. 'model-001')
+        elo REAL NOT NULL,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    ```
 
-3. **elo_history** - Az ELO pontszámok változásának történeti nyomon követésére
-   ```
-   id INTEGER PRIMARY KEY
-   model TEXT
-   elo REAL
-   timestamp TIMESTAMP
-   ```
+3.  **elo_history** - Az ELO pontszámok változásának történeti nyomon követésére
+    ```sql
+    CREATE TABLE elo_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        model TEXT NOT NULL, -- Modell azonosító (pl. 'model-001')
+        elo REAL NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    ```
 
 ## 🔌 API végpontok
 
 A rendszer a következő API végpontokat biztosítja:
 
-| Végpont | Metódus | Leírás |
-|---------|---------|--------|
-| `/api/battle_data` | GET | Véletlenszerűen kiválaszt két modellt és egy promptot, visszaadja a szükséges képek URL-jeit a csatához. |
-| `/api/side_by_side_data` | GET | Két megadott modellhez és egy véletlenszerű prompthoz visszaadja a képek URL-jeit. |
-| `/api/vote` | POST | Rögzíti a felhasználó szavazatát és frissíti az ELO értékeket. |
-| `/api/leaderboard` | GET | Visszaadja az aktuális Leaderboard adatokat (ELO, győzelmek, meccsek, arányok). |
-| `/api/elo_history` | GET | Visszaadja az ELO értékek időbeli változásait a modellek grafikonos megjelenítéséhez. |
+| Végpont                                 | Metódus | Leírás                                                                                                                               |
+| --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `/`                                     | GET     | A főoldal megjelenítése.                                                                                                             |
+| `/images/<prompt_id>/<filename>`        | GET     | Képfájlok kiszolgálása a `data` mappából.                                                                                            |
+| `/api/battle_data`                      | GET     | Adatokat ad vissza az Arena Battle módhoz (prompt, két véletlenszerű modell képei és nevei).                                          |
+| `/api/side_by_side_data`                | GET     | Adatokat ad vissza a Side-by-Side módhoz (prompt, két kiválasztott modell képei és nevei).                                            |
+| `/api/get_image`                        | GET     | Visszaadja egy adott modell képének URL-jét egy adott prompt ID-hoz (Side-by-Side módhoz használt).                                   |
+| `/api/vote`                             | POST    | Rögzíti a felhasználó szavazatát (győztes, vesztes) és frissíti az ELO értékeket.                                                      |
+| `/api/leaderboard`                      | GET     | Visszaadja az aktuális Leaderboard adatokat (modellek neve, ELO, győzelmek, meccsek, győzelmi arány, open source státusz).             |
+| `/api/elo_history`                      | GET     | (Elavult lehet) Visszaadja az ELO értékek időbeli változásait a modellek grafikonos megjelenítéséhez.                                  |
+| `/api/elo_history_with_current_elo`     | GET     | Visszaadja az ELO értékek időbeli változásait (`history`) és az aktuális ELO pontszámokat (`current_elos`) a grafikonhoz és szűréshez. |
+| `/api/prompt_ids`                       | GET     | Visszaadja az összes elérhető prompt ID-t.                                                                                           |
+| `/api/prompt_text`                      | GET     | Visszaadja a prompt szövegét egy adott prompt_id-hoz.                                                                                |
 
 ## 📝 Licenc
 
