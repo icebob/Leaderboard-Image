@@ -143,6 +143,7 @@ MODELS = {
 - Tencent Hunyuan Image 2.0
 - Google Imagen 4
 - Recraft V3 Raw
+- ByteDance BAGEL
 
 ## 🗄️ Adatbázis struktúra
 

@@ -35,6 +35,7 @@ MODELS = {
     'model-022': {'name': 'Tencent Hunyuan Image 2.0', 'filename': 'hunyuan-image-2.0', 'open_source': False},
     'model-023': {'name': 'Google Imagen 4', 'filename': 'imagen4', 'open_source': False},
     'model-024': {'name': 'Recraft V3 Raw', 'filename': 'recraft-v3-raw', 'open_source': False},
+    'model-025': {'name': 'ByteDance BAGEL', 'filename': 'bagel', 'open_source': False},
 }
 
 # Engedélyezett képkiterjesztések listája
