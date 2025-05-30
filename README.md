@@ -144,6 +144,7 @@ MODELS = {
 - Google Imagen 4
 - Recraft V3 Raw
 - ByteDance BAGEL
+- FLUX.1 Kontext [pro]
 
 ## 🗄️ Adatbázis struktúra
 
