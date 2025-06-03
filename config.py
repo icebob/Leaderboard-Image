@@ -37,7 +37,7 @@ MODELS = {
     'model-024': {'name': 'Recraft V3 Raw', 'filename': 'recraft-v3-raw', 'open_source': False},
     'model-025': {'name': 'ByteDance BAGEL', 'filename': 'bagel', 'open_source': True},
     'model-026': {'name': 'FLUX.1 Kontext [pro]', 'filename': 'flux1-kontext-pro', 'open_source': False},
-    'model-027': {'name': 'Chroma v34', 'filename': 'chroma-34', 'open_source': False},
+    'model-027': {'name': 'Chroma v34', 'filename': 'chroma-34', 'open_source': True},
 }
 
 # Engedélyezett képkiterjesztések listája
