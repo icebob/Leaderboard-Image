@@ -145,6 +145,7 @@ MODELS = {
 - Recraft V3 Raw
 - ByteDance BAGEL
 - FLUX.1 Kontext [pro]
+- Chroma v34
 
 ## 🗄️ Adatbázis struktúra
 
