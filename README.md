@@ -146,6 +146,7 @@ MODELS = {
 - ByteDance BAGEL
 - FLUX.1 Kontext [pro]
 - Chroma v34
+- Ernie 4.5 Turbo
 
 ## 🗄️ Adatbázis struktúra
 
