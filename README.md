@@ -147,6 +147,7 @@ MODELS = {
 - FLUX.1 Kontext [pro]
 - Chroma v34
 - Ernie 4.5 Turbo
+- Google Imagen 4 Ultra
 
 ## 🗄️ Adatbázis struktúra
 
