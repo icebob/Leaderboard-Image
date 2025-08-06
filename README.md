@@ -148,6 +148,7 @@ MODELS = {
 - Chroma v34
 - Ernie 4.5 Turbo
 - Google Imagen 4 Ultra
+- Qwen-Image
 
 ## 🗄️ Adatbázis struktúra
 
