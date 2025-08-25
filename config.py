@@ -41,6 +41,7 @@ MODELS = {
     'model-028': {'name': 'Ernie 4.5 Turbo', 'filename': 'ernie-45turbo', 'open_source': False},
     'model-029': {'name': 'Google Imagen 4 Ultra', 'filename': 'imagen4ultra', 'open_source': False},
     'model-030': {'name': 'Qwen-Image', 'filename': 'qwen-image', 'open_source': True},
+    'model-031': {'name': 'FLUX.1 Krea', 'filename': 'flux1-krea', 'open_source': True},
 }
 
 # Engedélyezett képkiterjesztések listája
