@@ -150,6 +150,7 @@ MODELS = {
 - Google Imagen 4 Ultra
 - Qwen-Image
 - Gemini 2.5 Flash Image Preview
+- FLUX.1 Krea
 
 ## 🗄️ Adatbázis struktúra
 
