@@ -149,6 +149,7 @@ MODELS = {
 - Ernie 4.5 Turbo
 - Google Imagen 4 Ultra
 - Qwen-Image
+- Gemini 2.5 Flash Image Preview
 
 ## 🗄️ Adatbázis struktúra
 
