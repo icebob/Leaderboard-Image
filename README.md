@@ -152,6 +152,7 @@ MODELS = {
 - Gemini 2.5 Flash Image Preview
 - FLUX.1 Krea
 - Tencent Hunyuan Image 2.1
+- ByteDance Seedream 4.0 4k
 
 ## 🗄️ Adatbázis struktúra
 

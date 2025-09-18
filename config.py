@@ -43,7 +43,8 @@ MODELS = {
     'model-030': {'name': 'Qwen-Image', 'filename': 'qwen-image', 'open_source': True},
     'model-031': {'name': 'Gemini 2.5 Flash Image Preview', 'filename': 'gemini25flashimagepreview', 'open_source': False},
     'model-032': {'name': 'FLUX.1 Krea', 'filename': 'flux1-krea', 'open_source': True},
-    'model-033': {'name': 'Tencent Hunyuan Image 2.1', 'filename': 'hunyuan-image-2.1', 'open_source': True}
+    'model-033': {'name': 'Tencent Hunyuan Image 2.1', 'filename': 'hunyuan-image-2.1', 'open_source': True},
+    'model-034': {'name': 'ByteDance Seedream 4.0 4k', 'filename': 'seedream-4.0-4k', 'open_source': False}
 }
 
 # Engedélyezett képkiterjesztések listája
