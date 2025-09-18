@@ -153,6 +153,7 @@ MODELS = {
 - FLUX.1 Krea
 - Tencent Hunyuan Image 2.1
 - ByteDance Seedream 4.0 4k
+- Kling AI KOLORS 2.1
 
 ## 🗄️ Adatbázis struktúra
 
