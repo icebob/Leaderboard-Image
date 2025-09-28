@@ -45,7 +45,8 @@ MODELS = {
     'model-032': {'name': 'FLUX.1 Krea', 'filename': 'flux1-krea', 'open_source': True},
     'model-033': {'name': 'Tencent Hunyuan Image 2.1', 'filename': 'hunyuan-image-2.1', 'open_source': True},
     'model-034': {'name': 'ByteDance Seedream 4.0 4k', 'filename': 'seedream-4.0-4k', 'open_source': False},
-    'model-035': {'name': 'Kling AI KOLORS 2.1', 'filename': 'klingai-kolors-2.1', 'open_source': False}
+    'model-035': {'name': 'Kling AI KOLORS 2.1', 'filename': 'klingai-kolors-2.1', 'open_source': False},
+    'model-036': {'name': 'Tencent HunyuanImage-3.0', 'filename': 'hunyuan-image-3.0', 'open_source': True}
 }
 
 # Engedélyezett képkiterjesztések listája

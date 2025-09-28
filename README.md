@@ -154,6 +154,7 @@ MODELS = {
 - Tencent Hunyuan Image 2.1
 - ByteDance Seedream 4.0 4k
 - Kling AI KOLORS 2.1
+- Tencent HunyuanImage-3.0
 
 ## 🗄️ Adatbázis struktúra
 
