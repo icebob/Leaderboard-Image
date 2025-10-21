@@ -4,12 +4,16 @@ import { fetchData } from './api.js';
 const sbsModeDiv = document.getElementById('side-by-side-mode');
 const sbsModel1Select = document.getElementById('sbs-model1-select');
 const sbsModel2Select = document.getElementById('sbs-model2-select');
+const sbsModel3Select = document.getElementById('sbs-model3-select');
 const sbsLoadBtn = document.getElementById('sbs-load-btn');
 const sbsPrompt = document.getElementById('sbs-prompt');
 const sbsModel1Name = document.getElementById('sbs-model1-name');
 const sbsImage1 = document.getElementById('sbs-image1');
 const sbsModel2Name = document.getElementById('sbs-model2-name');
 const sbsImage2 = document.getElementById('sbs-image2');
+const sbsModel3Container = document.getElementById('sbs-model3-container');
+const sbsModel3Name = document.getElementById('sbs-model3-name');
+const sbsImage3 = document.getElementById('sbs-image3');
 
 // Helper function to get model name from ID
 function getModelNameById(modelId) {
@@ -24,6 +28,7 @@ function getModelNameById(modelId) {
 // Állapot
 let currentSbsModel1 = '';
 let currentSbsModel2 = '';
+let currentSbsModel3 = '';
 let currentPromptId = null; // Az aktuális prompt azonosítója
 
 // Új funkció kép betöltéséhez modellváltáskor
@@ -64,20 +69,24 @@ async function loadSideBySideData() {
     // Kezdeti modellek beolvasása a select elemekből
     const selectedModel1 = sbsModel1Select.value;
     const selectedModel2 = sbsModel2Select.value;
+    const selectedModel3 = sbsModel3Select.value;
 
     if (!selectedModel1 || !selectedModel2) {
-        alert("Kérlek válassz ki mindkét modellt!");
+        alert("Kérlek válassz ki legalább két modellt!");
         return;
     }
-    if (selectedModel1 === selectedModel2) {
-        alert("Kérlek válassz két különböző modellt!");
-        // Opcionálisan visszaállíthatjuk a selecteket az előző állapotra, ha tároltuk őket
+
+    const selectedModels = [selectedModel1, selectedModel2, selectedModel3].filter(Boolean);
+    const uniqueModels = new Set(selectedModels);
+    if (uniqueModels.size !== selectedModels.length) {
+        alert("Kérlek válassz különböző modelleket!");
         return;
     }
 
     // Állapot frissítése a kiválasztottakkal
     currentSbsModel1 = selectedModel1;
     currentSbsModel2 = selectedModel2;
+    currentSbsModel3 = selectedModel3;
 
     sbsImage1.src = "";
     sbsImage2.src = "";
@@ -86,45 +95,63 @@ async function loadSideBySideData() {
     sbsPrompt.textContent = "Prompt betöltése...";
     sbsModel1Name.textContent = getModelNameById(currentSbsModel1);
     sbsModel2Name.textContent = getModelNameById(currentSbsModel2);
+
+    if (currentSbsModel3) {
+        sbsModel3Container.style.display = 'block';
+        sbsImage3.src = "";
+        sbsImage3.alt = `${getModelNameById(currentSbsModel3)} képének betöltése...`;
+        sbsModel3Name.textContent = getModelNameById(currentSbsModel3);
+    } else {
+        sbsModel3Container.style.display = 'none';
+    }
+
     sbsLoadBtn.disabled = true;
 
-    // Mindig új promptot kérünk a "Betöltés" gombbal
     let apiUrl = `/api/side_by_side_data?model1=${currentSbsModel1}&model2=${currentSbsModel2}`;
-    // Nem küldjük a previous_prompt_id-t, hogy a szerver új promptot adjon.
-    // Ha mégis a régi promptot kéne használni, ha van, akkor a currentPromptId-t nem nulláznánk
-    // és hozzáadnánk a previous_prompt_id paramétert, ha currentPromptId létezik.
-    // currentPromptId = null; // Ezt nem kell nullázni, a válaszban kapott ID felülírja
-
+    if (currentSbsModel3) {
+        apiUrl += `&model3=${currentSbsModel3}`;
+    }
+    
     const data = await fetchData(apiUrl);
-    if (data && data.prompt_id) { // Ellenőrizzük, hogy kaptunk-e prompt_id-t
-        // Aktualizáljuk a jelenlegi prompt ID-t
+    if (data && data.prompt_id) {
         currentPromptId = data.prompt_id;
 
         sbsPrompt.textContent = `Prompt: "${data.prompt_text}" (ID: ${data.prompt_id})`;
+        
         sbsImage1.src = data.model1.image_url;
+        sbsImage1.alt = `${data.model1.name} képe`;
+        sbsModel1Name.textContent = data.model1.name;
+
         sbsImage2.src = data.model2.image_url;
-        sbsImage1.alt = `${data.model1.name} képe`; // Use name from API response
-        sbsImage2.alt = `${data.model2.name} képe`; // Use name from API response
-        // Név frissítése itt is, a API válaszból
-        sbsModel1Name.textContent = data.model1.name; // Use name from API response
-        sbsModel2Name.textContent = data.model2.name; // Use name from API response
+        sbsImage2.alt = `${data.model2.name} képe`;
+        sbsModel2Name.textContent = data.model2.name;
+
+        if (data.model3) {
+            sbsModel3Container.style.display = 'block';
+            sbsImage3.src = data.model3.image_url;
+            sbsImage3.alt = `${data.model3.name} képe`;
+            sbsModel3Name.textContent = data.model3.name;
+        } else {
+            sbsModel3Container.style.display = 'none';
+        }
 
     } else {
         sbsPrompt.textContent = "Hiba a prompt betöltése közben.";
-        console.error("Hiba a side-by-side adatok lekérésekor:", data); // data can be null or {error: ...}
-        currentPromptId = null; // Hiba esetén nullázzuk
-        // Keep displaying names based on selection if API fails
+        console.error("Hiba a side-by-side adatok lekérésekor:", data);
+        currentPromptId = null;
         sbsModel1Name.textContent = getModelNameById(currentSbsModel1);
         sbsModel2Name.textContent = getModelNameById(currentSbsModel2);
         sbsImage1.alt = "Hiba a képbetöltéskor";
         sbsImage2.alt = "Hiba a képbetöltéskor";
+        if (currentSbsModel3) {
+            sbsModel3Name.textContent = getModelNameById(currentSbsModel3);
+            sbsImage3.alt = "Hiba a képbetöltéskor";
+        }
     }
     sbsLoadBtn.disabled = false;
 }
 
-// Következő prompt betöltése (nem random, hanem ID szerint)
 async function loadNextPromptData() {
-    // Lekérjük az összes prompt ID-t a szervertől
     const promptListData = await fetchData('/api/prompt_ids');
     if (!promptListData || !Array.isArray(promptListData.prompt_ids)) {
         alert('Nem sikerült lekérni a prompt listát!');
@@ -135,115 +162,125 @@ async function loadNextPromptData() {
         alert('Nincs elérhető prompt!');
         return;
     }
-    // Ha nincs még prompt, az elsőt töltjük be
+
     let nextPromptId;
     if (!currentPromptId) {
         nextPromptId = promptIds[0];
     } else {
         const idx = promptIds.indexOf(currentPromptId);
-        if (idx === -1 || idx === promptIds.length - 1) {
-            nextPromptId = promptIds[0]; // Körbe érünk
-        } else {
-            nextPromptId = promptIds[idx + 1];
-        }
+        nextPromptId = (idx === -1 || idx === promptIds.length - 1) ? promptIds[0] : promptIds[idx + 1];
     }
-    // Modellek lekérése
+
     const selectedModel1 = sbsModel1Select.value;
     const selectedModel2 = sbsModel2Select.value;
+    const selectedModel3 = sbsModel3Select.value;
+
     if (!selectedModel1 || !selectedModel2) {
-        alert('Kérlek válassz ki mindkét modellt!');
+        alert('Kérlek válassz ki legalább két modellt!');
         return;
     }
-    if (selectedModel1 === selectedModel2) {
-        alert('Kérlek válassz két különböző modellt!');
+    const selectedModels = [selectedModel1, selectedModel2, selectedModel3].filter(Boolean);
+    if (new Set(selectedModels).size !== selectedModels.length) {
+        alert('Kérlek válassz különböző modelleket!');
         return;
     }
-    // Prompt szöveg lekérése
+
     const promptData = await fetchData(`/api/prompt_text?prompt_id=${nextPromptId}`);
     if (!promptData || !promptData.prompt_text) {
         alert('Nem sikerült lekérni a prompt szövegét!');
         return;
     }
-    // Képek lekérése a két modellhez
-    const [img1, img2] = await Promise.all([
+
+    const imagePromises = [
         fetchData(`/api/get_image?model=${encodeURIComponent(selectedModel1)}&prompt_id=${nextPromptId}`),
         fetchData(`/api/get_image?model=${encodeURIComponent(selectedModel2)}&prompt_id=${nextPromptId}`)
-    ]);
-    // Állapot frissítése
+    ];
+    if (selectedModel3) {
+        imagePromises.push(fetchData(`/api/get_image?model=${encodeURIComponent(selectedModel3)}&prompt_id=${nextPromptId}`));
+    }
+
+    const [img1, img2, img3] = await Promise.all(imagePromises);
+
     currentPromptId = nextPromptId;
     currentSbsModel1 = selectedModel1;
     currentSbsModel2 = selectedModel2;
-    // UI frissítés
+    currentSbsModel3 = selectedModel3;
+
     sbsPrompt.textContent = `Prompt: "${promptData.prompt_text}" (ID: ${nextPromptId})`;
-    sbsImage1.src = img1 && img1.image_url ? img1.image_url : '';
-    sbsImage2.src = img2 && img2.image_url ? img2.image_url : '';
+    
+    sbsImage1.src = img1?.image_url || '';
     sbsImage1.alt = `${getModelNameById(currentSbsModel1)} képe`;
-    sbsImage2.alt = `${getModelNameById(currentSbsModel2)} képe`;
     sbsModel1Name.textContent = getModelNameById(currentSbsModel1);
+
+    sbsImage2.src = img2?.image_url || '';
+    sbsImage2.alt = `${getModelNameById(currentSbsModel2)} képe`;
     sbsModel2Name.textContent = getModelNameById(currentSbsModel2);
+
+    if (currentSbsModel3 && img3) {
+        sbsModel3Container.style.display = 'block';
+        sbsImage3.src = img3.image_url || '';
+        sbsImage3.alt = `${getModelNameById(currentSbsModel3)} képe`;
+        sbsModel3Name.textContent = getModelNameById(currentSbsModel3);
+    } else {
+        sbsModel3Container.style.display = 'none';
+        sbsImage3.src = '';
+    }
 }
 
-// Event listeners
 export function initSideBySideMode() {
-    // Eseményfigyelők a modellek kiválasztásához
-    sbsModel1Select.addEventListener('change', async (event) => {
-        const newModel1 = event.target.value;
-        // Ellenőrizzük, hogy a választott modell eltér-e a másik oldalon lévőtől
-        if (newModel1 === currentSbsModel2) {
-            alert("A két modell nem lehet azonos!");
-            event.target.value = currentSbsModel1; // Visszaállítjuk az előzőre
+    const handleModelChange = async (changedSelect, newModelId, modelNumber) => {
+        const otherModelIds = [currentSbsModel1, currentSbsModel2, currentSbsModel3].filter((_, i) => i + 1 !== modelNumber);
+        if (newModelId && otherModelIds.includes(newModelId)) {
+            alert("A modellek nem lehetnek azonosak!");
+            changedSelect.value = modelNumber === 1 ? currentSbsModel1 : (modelNumber === 2 ? currentSbsModel2 : currentSbsModel3);
             return;
         }
-        // Csak akkor csinálunk bármit, ha ténylegesen változott a modell
-        if (newModel1 !== currentSbsModel1) {
-            const oldModel1 = currentSbsModel1;
-            currentSbsModel1 = newModel1; // Frissítjük az állapotot
 
-            // Csak akkor töltjük újra a képet, ha már van betöltött prompt
-            if (currentPromptId) {
-                 // Azonnal frissítjük a nevet és elindítjuk a képbetöltést
-                 await fetchModelImage(currentSbsModel1, currentPromptId, sbsImage1, sbsModel1Name);
-            }
-            // Ha még nincs prompt betöltve (pl. oldalbetöltés után), nem csinálunk semmit
-            // a kép újratöltésével, csak az állapotot frissítettük. A "Betöltés" gomb hozza majd az első képeket.
+        let imageElement, modelNameElement;
+        switch (modelNumber) {
+            case 1:
+                currentSbsModel1 = newModelId;
+                imageElement = sbsImage1;
+                modelNameElement = sbsModel1Name;
+                break;
+            case 2:
+                currentSbsModel2 = newModelId;
+                imageElement = sbsImage2;
+                modelNameElement = sbsModel2Name;
+                break;
+            case 3:
+                currentSbsModel3 = newModelId;
+                imageElement = sbsImage3;
+                modelNameElement = sbsModel3Name;
+                sbsModel3Container.style.display = newModelId ? 'block' : 'none';
+                break;
         }
-    });
 
-    sbsModel2Select.addEventListener('change', async (event) => {
-        const newModel2 = event.target.value;
-        // Ellenőrizzük, hogy a választott modell eltér-e a másik oldalon lévőtől
-        if (newModel2 === currentSbsModel1) {
-            alert("A két modell nem lehet azonos!");
-            event.target.value = currentSbsModel2; // Visszaállítjuk az előzőre
-            return;
+        if (currentPromptId && newModelId) {
+            await fetchModelImage(newModelId, currentPromptId, imageElement, modelNameElement);
+        } else if (!newModelId && modelNumber === 3) {
+            sbsImage3.src = '';
+            sbsModel3Name.textContent = 'Modell 3';
         }
-         // Csak akkor csinálunk bármit, ha ténylegesen változott a modell
-        if (newModel2 !== currentSbsModel2) {
-            const oldModel2 = currentSbsModel2;
-            currentSbsModel2 = newModel2; // Frissítjük az állapotot
+    };
 
-            // Csak akkor töltjük újra a képet, ha már van betöltött prompt
-            if (currentPromptId) {
-                 // Azonnal frissítjük a nevet és elindítjuk a képbetöltést
-                 await fetchModelImage(currentSbsModel2, currentPromptId, sbsImage2, sbsModel2Name);
-            }
-             // Ha még nincs prompt betöltve, nem csinálunk semmit.
-        }
-    });
+    sbsModel1Select.addEventListener('change', (e) => handleModelChange(e.target, e.target.value, 1));
+    sbsModel2Select.addEventListener('change', (e) => handleModelChange(e.target, e.target.value, 2));
+    sbsModel3Select.addEventListener('change', (e) => handleModelChange(e.target, e.target.value, 3));
 
-    // Eseményfigyelő a "Betöltés" gombra
     sbsLoadBtn.addEventListener('click', loadSideBySideData);
 
-    // Következő prompt gomb eseménykezelő
     const sbsNextBtn = document.getElementById('sbs-next-btn');
     if (sbsNextBtn) {
         sbsNextBtn.addEventListener('click', loadNextPromptData);
     }
 
-    // Kezdeti modellek beállítása az oldalbetöltéskor (ha vannak alapértelmezett értékek a HTML-ben)
-    // Ezeket az értékeket a loadSideBySideData fogja használni az első kattintáskor.
     currentSbsModel1 = sbsModel1Select.value;
     currentSbsModel2 = sbsModel2Select.value;
+    currentSbsModel3 = sbsModel3Select.value;
+    if (currentSbsModel3) {
+        sbsModel3Container.style.display = 'block';
+    }
 }
 
 // Megjegyzés: A `fetchData` importálva van a './api.js'-ből.
