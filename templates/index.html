@@ -67,41 +67,63 @@
 
         <!-- Side-by-Side Mode -->
         <div id="side-by-side-mode" class="arena-mode" style="display: none;">
-            <h2 class="text-center mb-3">Side-by-Side Összehasonlítás</h2>
-            <div class="row mb-3 justify-content-center">
-                <div class="col-md-4">
-                    <label for="sbs-model1-select" class="form-label">Válassz modellt 1:</label>
-                    <select id="sbs-model1-select" class="form-select">
-                        {% for model_item in models %}
-                        <option value="{{ model_item.id }}">{{ model_item.name }}</option>
-                        {% endfor %}
-                    </select>
+            <div class="container">
+                <h2 class="text-center mb-3">Side-by-Side Összehasonlítás</h2>
+                <div class="row mb-3 justify-content-center">
+                    <div class="col-md-3">
+                        <label for="sbs-model1-select" class="form-label">Válassz modellt 1:</label>
+                        <select id="sbs-model1-select" class="form-select">
+                            {% for model_item in models %}
+                            <option value="{{ model_item.id }}">{{ model_item.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="sbs-model2-select" class="form-label">Válassz modellt 2:</label>
+                        <select id="sbs-model2-select" class="form-select">
+                             {% for model_item in models %}
+                             {% if loop.index == 2 %}
+                             <option value="{{ model_item.id }}" selected>{{ model_item.name }}</option>
+                             {% else %}
+                             <option value="{{ model_item.id }}">{{ model_item.name }}</option>
+                             {% endif %}
+                             {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="sbs-model3-select" class="form-label">Válassz modellt 3 (opcionális):</label>
+                        <select id="sbs-model3-select" class="form-select">
+                            <option value="" selected>Nincs</option>
+                             {% for model_item in models %}
+                             {% if loop.index == 3 %}
+                             <option value="{{ model_item.id }}" selected>{{ model_item.name }}</option>
+                             {% else %}
+                             <option value="{{ model_item.id }}">{{ model_item.name }}</option>
+                             {% endif %}
+                             {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 align-self-end d-flex flex-column gap-2">
+                        <button id="sbs-load-btn" class="btn btn-primary w-100">Betöltés / Új Prompt</button>
+                        <button id="sbs-next-btn" class="btn btn-warning w-100">Következő prompt</button>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="sbs-model2-select" class="form-label">Válassz modellt 2:</label>
-                    <select id="sbs-model2-select" class="form-select">
-                         {% for model_item in models %}
-                         {% if loop.index == 2 %} {# Alapértelmezetten a másodikat válasszuk #}
-                         <option value="{{ model_item.id }}" selected>{{ model_item.name }}</option>
-                         {% else %}
-                         <option value="{{ model_item.id }}">{{ model_item.name }}</option>
-                         {% endif %}
-                         {% endfor %}
-                    </select>
-                </div>                <div class="col-md-2 align-self-end d-flex flex-column gap-2">
-                    <button id="sbs-load-btn" class="btn btn-primary w-100">Betöltés / Új Prompt</button>
-                    <button id="sbs-next-btn" class="btn btn-warning w-100">Következő prompt</button>
-                </div>
+                <p class="text-center mb-4 fst-italic" id="sbs-prompt">Válassz modelleket és kattints a Betöltés gombra...</p>
             </div>
-            <p class="text-center mb-4 fst-italic" id="sbs-prompt">Válassz modelleket és kattints a Betöltés gombra...</p>
-            <div class="row justify-content-center">
-                <div class="col-md-5 text-center mb-3">
-                    <h4 id="sbs-model1-name">Modell 1</h4>
-                    <img id="sbs-image1" src="" alt="Modell 1 képe" class="img-fluid rounded arena-image">
-                </div>
-                <div class="col-md-5 text-center mb-3">
-                    <h4 id="sbs-model2-name">Modell 2</h4>
-                    <img id="sbs-image2" src="" alt="Modell 2 képe" class="img-fluid rounded arena-image">
+            <div class="container-fluid">
+                <div id="sbs-images-container" class="row justify-content-center">
+                    <div class="col-md-6 col-lg-4 text-center mb-3">
+                        <h4 id="sbs-model1-name">Modell 1</h4>
+                        <img id="sbs-image1" src="" alt="Modell 1 képe" class="img-fluid rounded arena-image sbs-image">
+                    </div>
+                    <div class="col-md-6 col-lg-4 text-center mb-3">
+                        <h4 id="sbs-model2-name">Modell 2</h4>
+                        <img id="sbs-image2" src="" alt="Modell 2 képe" class="img-fluid rounded arena-image sbs-image">
+                    </div>
+                    <div id="sbs-model3-container" class="col-md-6 col-lg-4 text-center mb-3" style="display: none;">
+                        <h4 id="sbs-model3-name">Modell 3</h4>
+                        <img id="sbs-image3" src="" alt="Modell 3 képe" class="img-fluid rounded arena-image sbs-image">
+                    </div>
                 </div>
             </div>
         </div>        <!-- Leaderboard Mode -->

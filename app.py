@@ -195,12 +195,15 @@ def get_side_by_side_data():
     """Adatokat ad vissza az Arena Side-by-Side módhoz."""
     model1_id = request.args.get('model1')
     model2_id = request.args.get('model2')
+    model3_id = request.args.get('model3')  # Optional third model
     previous_prompt_id = request.args.get('previous_prompt_id', None)
 
     if not model1_id or not model2_id:
         return jsonify({"error": "Both model1 and model2 parameters are required"}), 400
     if model1_id not in MODELS or model2_id not in MODELS:
         return jsonify({"error": "Invalid model key provided"}), 400
+    if model3_id and model3_id not in MODELS:
+        return jsonify({"error": "Invalid model3 key provided"}), 400
     if not AVAILABLE_PROMPTS:
         return jsonify({"error": "No prompts available"}), 500
 
@@ -241,6 +244,18 @@ def get_side_by_side_data():
             "image_url": f"/images/{prompt_id}/{model2_file}"
         }
     }
+    
+    # Add third model if requested
+    if model3_id:
+        model3_file = find_model_file(prompt_id, MODELS[model3_id]['filename'])
+        if not model3_file:
+            return jsonify({"error": f"Image for model {model3_id} not found in prompt {prompt_id}"}), 500
+        data["model3"] = {
+            "id": model3_id,
+            "name": MODELS[model3_id]['name'],
+            "image_url": f"/images/{prompt_id}/{model3_file}"
+        }
+    
     return jsonify(data)
 
 # Új API végpont a kép URL lekéréséhez modellváltáskor
