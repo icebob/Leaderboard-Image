@@ -157,6 +157,7 @@ MODELS = {
 - Tencent HunyuanImage-3.0
 - OpenAI: GPT-5 Image Mini High
 - OpenAI: GPT-5 Image Mini Low
+- OpenAI: GPT-5 Image Mini Medium
 
 ## 🗄️ Adatbázis struktúra
 

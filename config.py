@@ -48,7 +48,8 @@ MODELS = {
     'model-035': {'name': 'Kling AI KOLORS 2.1', 'filename': 'klingai-kolors-2.1', 'open_source': False},
     'model-036': {'name': 'Tencent HunyuanImage-3.0', 'filename': 'hunyuan-image-3.0', 'open_source': True},
     'model-037': {'name': 'OpenAI: GPT-5 Image Mini High', 'filename': 'gpt-5-image-mini-high', 'open_source': False},
-    'model-038': {'name': 'OpenAI: GPT-5 Image Mini Low', 'filename': 'gpt-5-image-mini-low', 'open_source': False}
+    'model-038': {'name': 'OpenAI: GPT-5 Image Mini Low', 'filename': 'gpt-5-image-mini-low', 'open_source': False},
+    'model-039': {'name': 'OpenAI: GPT-5 Image Mini Medium', 'filename': 'gpt-5-image-mini-medium', 'open_source': False},
 }
 
 # Engedélyezett képkiterjesztések listája
