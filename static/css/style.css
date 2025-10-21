@@ -23,6 +23,13 @@ body {
     border: 1px solid #dee2e6;
 }
 
+/* Side-by-side módban nagyobb képek */
+.sbs-image {
+    max-height: 80vh; /* A képernyő magasságának 80%-a maximum */
+    height: auto;
+    object-fit: contain; /* Megtartja az arányokat */
+}
+
 /* Opcionális: Betöltés animáció a képek helyén */
 /* .arena-image[src=""] { */
     /* background: #e9ecef url('loading.gif') center center no-repeat; */

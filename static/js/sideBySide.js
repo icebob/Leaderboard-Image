@@ -15,6 +15,23 @@ const sbsModel3Container = document.getElementById('sbs-model3-container');
 const sbsModel3Name = document.getElementById('sbs-model3-name');
 const sbsImage3 = document.getElementById('sbs-image3');
 
+// Helper function to adjust column sizes based on number of models
+function adjustColumnSizes(numModels) {
+    const model1Container = sbsImage1.closest('.col-md-6, .col-lg-4, .col-lg-6');
+    const model2Container = sbsImage2.closest('.col-md-6, .col-lg-4, .col-lg-6');
+    
+    if (numModels === 2) {
+        // Two models: each takes 50% on large screens, 100% on medium screens
+        model1Container.className = 'col-md-6 col-lg-6 text-center mb-3';
+        model2Container.className = 'col-md-6 col-lg-6 text-center mb-3';
+    } else if (numModels === 3) {
+        // Three models: each takes 33% on large screens
+        model1Container.className = 'col-md-6 col-lg-4 text-center mb-3';
+        model2Container.className = 'col-md-6 col-lg-4 text-center mb-3';
+        sbsModel3Container.className = 'col-md-6 col-lg-4 text-center mb-3';
+    }
+}
+
 // Helper function to get model name from ID
 function getModelNameById(modelId) {
     if (!window.MODELS_DATA) {
@@ -101,8 +118,10 @@ async function loadSideBySideData() {
         sbsImage3.src = "";
         sbsImage3.alt = `${getModelNameById(currentSbsModel3)} képének betöltése...`;
         sbsModel3Name.textContent = getModelNameById(currentSbsModel3);
+        adjustColumnSizes(3);
     } else {
         sbsModel3Container.style.display = 'none';
+        adjustColumnSizes(2);
     }
 
     sbsLoadBtn.disabled = true;
@@ -131,8 +150,10 @@ async function loadSideBySideData() {
             sbsImage3.src = data.model3.image_url;
             sbsImage3.alt = `${data.model3.name} képe`;
             sbsModel3Name.textContent = data.model3.name;
+            adjustColumnSizes(3);
         } else {
             sbsModel3Container.style.display = 'none';
+            adjustColumnSizes(2);
         }
 
     } else {
@@ -221,9 +242,11 @@ async function loadNextPromptData() {
         sbsImage3.src = img3.image_url || '';
         sbsImage3.alt = `${getModelNameById(currentSbsModel3)} képe`;
         sbsModel3Name.textContent = getModelNameById(currentSbsModel3);
+        adjustColumnSizes(3);
     } else {
         sbsModel3Container.style.display = 'none';
         sbsImage3.src = '';
+        adjustColumnSizes(2);
     }
 }
 
@@ -253,6 +276,7 @@ export function initSideBySideMode() {
                 imageElement = sbsImage3;
                 modelNameElement = sbsModel3Name;
                 sbsModel3Container.style.display = newModelId ? 'block' : 'none';
+                adjustColumnSizes(newModelId ? 3 : 2);
                 break;
         }
 
@@ -280,6 +304,9 @@ export function initSideBySideMode() {
     currentSbsModel3 = sbsModel3Select.value;
     if (currentSbsModel3) {
         sbsModel3Container.style.display = 'block';
+        adjustColumnSizes(3);
+    } else {
+        adjustColumnSizes(2);
     }
 }
 
