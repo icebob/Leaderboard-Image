@@ -156,6 +156,7 @@ MODELS = {
 - Kling AI KOLORS 2.1
 - Tencent HunyuanImage-3.0
 - OpenAI: GPT-5 Image Mini High
+- OpenAI: GPT-5 Image Mini Low
 
 ## 🗄️ Adatbázis struktúra
 
