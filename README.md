@@ -155,6 +155,7 @@ MODELS = {
 - ByteDance Seedream 4.0 4k
 - Kling AI KOLORS 2.1
 - Tencent HunyuanImage-3.0
+- OpenAI: GPT-5 Image Mini High
 
 ## 🗄️ Adatbázis struktúra
 
