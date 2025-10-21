@@ -14,20 +14,24 @@ const sbsImage2 = document.getElementById('sbs-image2');
 const sbsModel3Container = document.getElementById('sbs-model3-container');
 const sbsModel3Name = document.getElementById('sbs-model3-name');
 const sbsImage3 = document.getElementById('sbs-image3');
+const sbsModel1Container = document.getElementById('sbs-model1-img-container');
+const sbsModel2Container = document.getElementById('sbs-model2-img-container');
 
 // Helper function to adjust column sizes based on number of models
 function adjustColumnSizes(numModels) {
-    const model1Container = sbsImage1.closest('.col-md-6, .col-lg-4, .col-lg-6');
-    const model2Container = sbsImage2.closest('.col-md-6, .col-lg-4, .col-lg-6');
+    if (!sbsModel1Container || !sbsModel2Container || !sbsModel3Container) {
+        console.warn('Container elements not found for adjustColumnSizes');
+        return;
+    }
     
     if (numModels === 2) {
         // Two models: each takes 50% on large screens, 100% on medium screens
-        model1Container.className = 'col-md-6 col-lg-6 text-center mb-3';
-        model2Container.className = 'col-md-6 col-lg-6 text-center mb-3';
+        sbsModel1Container.className = 'col-md-6 col-lg-6 text-center mb-3';
+        sbsModel2Container.className = 'col-md-6 col-lg-6 text-center mb-3';
     } else if (numModels === 3) {
         // Three models: each takes 33% on large screens
-        model1Container.className = 'col-md-6 col-lg-4 text-center mb-3';
-        model2Container.className = 'col-md-6 col-lg-4 text-center mb-3';
+        sbsModel1Container.className = 'col-md-6 col-lg-4 text-center mb-3';
+        sbsModel2Container.className = 'col-md-6 col-lg-4 text-center mb-3';
         sbsModel3Container.className = 'col-md-6 col-lg-4 text-center mb-3';
     }
 }
