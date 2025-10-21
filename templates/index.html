@@ -197,9 +197,6 @@
         </div>
     </div>
 
-    <footer class="text-center mt-5 mb-3 text-muted">
-        <small>Készült Flask & Bootstrap használatával.</small>
-    </footer>
     <script>
         window.MODELS_DATA = JSON.parse('{{ models | tojson | safe }}');
         window.REVEAL_DELAY_MS = {{ reveal_delay_ms }}; // Make reveal_delay_ms globally available too if needed by config.js
