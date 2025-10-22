@@ -158,6 +158,7 @@ MODELS = {
 - OpenAI: GPT-5 Image Mini High
 - OpenAI: GPT-5 Image Mini Low
 - OpenAI: GPT-5 Image Mini Medium
+- Microsoft: MAI-Image-1
 
 ## 🗄️ Adatbázis struktúra
 
