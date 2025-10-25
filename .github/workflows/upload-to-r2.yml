@@ -36,4 +36,3 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.UPLOAD_R2_SECRET_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.UPLOAD_R2_ACCOUNT_ID }}
           R2_BUCKET: ${{ secrets.UPLOAD_R2_BUCKET }}
-        if: ${{ secrets.UPLOAD_R2_ACCOUNT_ID != '' && secrets.UPLOAD_R2_ACCESS_KEY != '' && secrets.UPLOAD_R2_SECRET_KEY != '' && secrets.UPLOAD_R2_BUCKET != '' }}
